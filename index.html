@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en" class="">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Mini Perfume Shop</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: { extend: { fontFamily: { sans: ["ui-sans-serif", "system-ui"] } } }
+    }
+  </script>
+</head>
+
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+  <!-- Top Bar -->
+  <header class="sticky top-0 z-30 border-b bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-2xl bg-slate-900 dark:bg-white"></div>
+        <div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Mini App</p>
+          <h1 class="text-base font-semibold">9Perfume</h1>
+        </div>
+      </div>
+
+      <div class="hidden flex-1 items-center gap-2 md:flex md:justify-center">
+        <div class="relative w-full max-w-xl flex justify-beetween items-center">
+          <input id="searchInput" type="text" placeholder="Search perfumes (e.g., rose, oud, citrus)..."
+            class="w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                   bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15" />
+          <!-- <span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-slate-500">⌘K</span> -->
+          <div
+            class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-slate-500">
+            <svg class="brightness-100 invert dark:invert-0" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+              fill="#FFFFFF" viewBox="0 0 256 256">
+              <path
+                d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z">
+              </path>
+            </svg>
+          </div>
+
+        </div>
+
+        <select id="sortSelect" class="rounded-2xl border bg-white px-3 py-3 text-sm outline-none hover:bg-slate-50
+                 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+          <option value="featured">Sort: Featured</option>
+          <option value="price_asc">Price: Low → High</option>
+          <option value="price_desc">Price: High → Low</option>
+          <option value="name_asc">Name: A → Z</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="themeToggle" class="rounded-2xl border bg-white px-4 py-3 text-sm font-medium hover:bg-slate-50
+                 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+          🌙
+        </button>
+
+        <button id="openCartBtn"
+          class="relative rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+
+          <svg class="brightness-0 invert dark:invert-0" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+            fill="#FFFFFF" viewBox="0 0 256 256">
+            <path
+              d="M104,216a16,16,0,1,1-16-16A16,16,0,0,1,104,216Zm88-16a16,16,0,1,0,16,16A16,16,0,0,0,192,200ZM239.71,74.14l-25.64,92.28A24.06,24.06,0,0,1,191,184H92.16A24.06,24.06,0,0,1,69,166.42L33.92,40H16a8,8,0,0,1,0-16H40a8,8,0,0,1,7.71,5.86L57.19,64H232a8,8,0,0,1,7.71,10.14ZM221.47,80H61.64l22.81,82.14A8,8,0,0,0,92.16,168H191a8,8,0,0,0,7.71-5.86Z">
+            </path>
+          </svg>
+          <span id="cartCount" class="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border
+                   dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700">
+            0
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile controls -->
+    <div class="mx-auto max-w-6xl px-4 pb-4 md:hidden">
+      <div class="flex gap-2">
+        <input id="searchInputMobile" type="text" placeholder="Search perfumes..."
+          class="flex-1 rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                 bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15" />
+
+        <select id="sortSelectMobile" class="rounded-2xl border bg-white px-3 py-3 text-sm outline-none hover:bg-slate-50
+                 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+          <option value="featured">Featured</option>
+          <option value="price_asc">Price ↑</option>
+          <option value="price_desc">Price ↓</option>
+          <option value="name_asc">A → Z</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="mx-auto max-w-6xl px-4 py-8">
+    <!-- Hero -->
+    <section class="rounded-3xl border bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div class="max-w-2xl">
+          <p class="text-xs font-medium text-slate-500 dark:text-slate-400">NEW COLLECTION</p>
+          <h2 class="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
+            Find your signature scent.
+          </h2>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+            Curated blends with notes of citrus, rose, amber, and oud. Add to cart and checkout in seconds.
+          </p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <span
+              class="rounded-full border bg-slate-50 px-3 py-1 text-xs text-slate-600 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">Free
+              gift wrap</span>
+            <span
+              class="rounded-full border bg-slate-50 px-3 py-1 text-xs text-slate-600 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">Fast
+              delivery</span>
+            <span
+              class="rounded-full border bg-slate-50 px-3 py-1 text-xs text-slate-600 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">Secure
+              payment</span>
+          </div>
+        </div>
+
+        <div class="grid w-full max-w-md grid-cols-2 gap-3">
+          <div class="rounded-2xl border bg-slate-50 p-4 dark:bg-slate-950 dark:border-slate-800">
+            <p class="text-xs text-slate-500 dark:text-slate-400">Promo</p>
+            <p class="mt-1 text-sm font-semibold">WELCOME10</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Save 10% on checkout</p>
+          </div>
+          <div class="rounded-2xl border bg-slate-50 p-4 dark:bg-slate-950 dark:border-slate-800">
+            <p class="text-xs text-slate-500 dark:text-slate-400">Bestseller</p>
+            <p class="mt-1 text-sm font-semibold">Amber No. 7</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Warm & smooth</p>
+          </div>
+          <div class="col-span-2 rounded-2xl bg-slate-900 p-4 text-white dark:bg-white dark:text-slate-900">
+            <p class="text-xs opacity-70">Tip</p>
+            <p class="mt-1 text-sm font-semibold">Try “Sort: Low → High”</p>
+            <p class="mt-1 text-xs opacity-70">And search “rose” or “oud”</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Products -->
+    <section class="mt-8">
+      <div class="flex items-end justify-between gap-3">
+        <div>
+          <h3 class="text-base font-semibold">Perfumes</h3>
+          <p id="resultsText" class="text-sm text-slate-500 dark:text-slate-400">Showing 0 items</p>
+        </div>
+
+        <button id="clearFilters" class="rounded-2xl border bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50
+                 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+          Clear
+        </button>
+      </div>
+
+      <div id="productGrid" class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+    </section>
+
+    <footer class="mt-12 text-center text-xs text-slate-500 dark:text-slate-400">
+      © <span id="year"></span> anajak By Sak — mini app 9Perfume
+    </footer>
+  </main>
+
+  <!-- Cart Drawer -->
+  <aside id="cartDrawer" class="fixed inset-0 z-40 hidden">
+    <div id="cartOverlay" class="absolute inset-0 bg-black/40"></div>
+
+    <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl dark:bg-slate-950">
+      <div class="flex items-center justify-between border-b px-5 py-4 dark:border-slate-800">
+        <div>
+          <h3 class="text-sm font-semibold">Your cart</h3>
+          <p id="cartSub" class="text-xs text-slate-500 dark:text-slate-400">0 items</p>
+        </div>
+        <button id="closeCartBtn"
+          class="rounded-xl px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-900">✕</button>
+      </div>
+
+      <div class="px-5 py-4">
+        <div class="rounded-2xl border bg-slate-50 p-3 dark:bg-slate-900 dark:border-slate-800">
+          <p class="text-xs text-slate-500 dark:text-slate-400">Promo code</p>
+          <div class="mt-2 flex gap-2">
+            <input id="promoInput" type="text" placeholder="WELCOME10"
+              class="flex-1 rounded-xl border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                     dark:bg-slate-950 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15" />
+            <button id="applyPromo" class="rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800
+                     dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+              Apply
+            </button>
+          </div>
+          <p id="promoHint" class="mt-2 text-xs text-slate-500 dark:text-slate-400">Try WELCOME10 for 10% off.</p>
+        </div>
+
+        <ul id="cartItems" class="mt-4 space-y-3"></ul>
+
+        <div id="emptyCart"
+          class="mt-6 hidden rounded-2xl border bg-white p-5 text-center dark:bg-slate-900 dark:border-slate-800">
+          <p class="text-sm font-medium">Your cart is empty</p>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Add a perfume to get started.</p>
+        </div>
+      </div>
+
+      <div class="absolute bottom-0 left-0 right-0 border-t bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-950">
+        <div class="space-y-1 text-sm">
+          <div class="flex justify-between text-slate-600 dark:text-slate-300">
+            <span>Subtotal</span><span id="subtotalText">$0.00</span>
+          </div>
+          <div class="flex justify-between text-slate-600 dark:text-slate-300">
+            <span>Discount</span><span id="discountText">-$0.00</span>
+          </div>
+          <div class="flex justify-between font-semibold">
+            <span>Total</span><span id="totalText">$0.00</span>
+          </div>
+        </div>
+
+        <button id="checkoutBtn" class="mt-4 w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50
+                 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+          Checkout
+        </button>
+
+        <button id="clearCartBtn" class="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-sm font-medium hover:bg-slate-50
+                 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+          Clear cart
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Checkout Modal -->
+  <div id="checkoutBackdrop" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
+    <div class="w-full max-w-lg rounded-3xl bg-white shadow-xl dark:bg-slate-950">
+      <div class="flex items-center justify-between border-b px-6 py-4 dark:border-slate-800">
+        <h3 class="text-sm font-semibold">Checkout</h3>
+        <button id="closeCheckout"
+          class="rounded-xl px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-900">✕</button>
+      </div>
+
+      <form id="checkoutForm" class="px-6 py-5 space-y-4">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Full name</label>
+            <input required id="name"
+              class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                     bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+              placeholder="Your name" />
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Phone</label>
+            <input required id="phone"
+              class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                     bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+              placeholder="+855 ..." />
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Delivery address</label>
+          <input required id="address"
+            class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                   bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+            placeholder="Street, city, details" />
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Payment</label>
+            <select id="payment" class="mt-1 w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none hover:bg-slate-50
+                     dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+              <option>Cash on delivery</option>
+              <option>Card (demo)</option>
+              <option>ABA / Bank transfer (demo)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Note</label>
+            <input id="note"
+              class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                     bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+              placeholder="Gift wrap, call before..." />
+          </div>
+        </div>
+
+        <div class="rounded-2xl border bg-slate-50 p-4 text-sm dark:bg-slate-900 dark:border-slate-800">
+          <div class="flex justify-between text-slate-600 dark:text-slate-300">
+            <span>Order total</span><span id="checkoutTotal">$0.00</span>
+          </div>
+          <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+            This is a demo checkout (no real payments). On submit we’ll “place order” and clear cart.
+          </p>
+        </div>
+
+        <button class="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800
+                       dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+          Place order
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="pointer-events-none fixed bottom-4 right-4 z-[60] hidden max-w-sm rounded-2xl border bg-white px-4 py-3 shadow-lg
+           dark:bg-slate-900 dark:border-slate-800">
+    <p id="toastText" class="text-sm text-slate-800 dark:text-slate-100"></p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
