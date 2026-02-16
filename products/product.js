@@ -84,14 +84,15 @@ document.addEventListener('DOMContentLoaded', updateActiveNav);
 // search : productGrid
 // =========================
 
-// ---------- Data popular ----------
+// ---------- Data product ----------
 const PRODUCTS = [
   { id: "p1", image: "/images/1.jpg", name: "Amber No. 7", brand: "ScentHouse", price: 69, size: "50ml", notes: ["amber", "vanilla", "musk"], vibe: "Warm • Smooth", featured: 1, des: "" },
   { id: "p2", image: "/images/2.jpg", name: "Rose Velvet", brand: "Maison Bloom", price: 54, size: "50ml", notes: ["rose", "peony", "powder"], vibe: "Soft • Romantic", featured: 2, des: "A soft and romantic rose scent with peony and powder notes." },
   { id: "p3", image: "/images/1.jpg", name: "Citrus Dawn", brand: "Atelier Fresh", price: 42, size: "30ml", notes: ["citrus", "bergamot", "tea"], vibe: "Bright • Clean", featured: 3, des: "A bright and clean citrus scent with bergamot and tea notes." },
   { id: "p4", image: "/images/2.jpg", name: "Oud Night", brand: "Desert Noir", price: 89, size: "60ml", notes: ["oud", "spice", "smoke"], vibe: "Bold • Luxe", featured: 4, des: "A bold and luxurious oud scent with spice and smoke notes." },
+  { id: "p5", image: "/images/1.jpg", name: "Jasmine Breeze", brand: "ScentHouse", price: 59, size: "50ml", notes: ["jasmine", "green tea", "musk"], vibe: "Fresh • Elegant", featured: 5, des: "A fresh and elegant jasmine scent with green tea and musk notes." },
 ];
-clearFilters
+
 // ---------- State ----------
 const STORAGE_KEY = "miniperfume_cart_v1";
 const PROMO_CODE = "WELCOME10";
@@ -267,12 +268,41 @@ function getFilteredSortedProducts() {
 
 function renderProducts() {
   const items = getFilteredSortedProducts();
-  $("#productGrid").innerHTML = items.map(productCard).join("");
-  $("#resultsText").textContent = `Showing ${items.length} item${items.length === 1 ? "" : "s"}`;
+  const container = $("#productGrid");
 
-  $$("#productGrid [data-add]").forEach(btn => {
-    btn.addEventListener("click", () => addToCart(btn.dataset.add));
-  });
+  // ១. បំបែកផលិតផលជាក្រុមៗតាម Brand
+  const grouped = items.reduce((acc, p) => {
+    if (!acc[p.brand]) acc[p.brand] = [];
+    acc[p.brand].push(p);
+    return acc;
+  }, {});
+
+  // ២. បង្កើត HTML សម្រាប់ក្រុម Brand នីមួយៗ
+  let finalHtml = "";
+
+  for (const brand in grouped) {
+    finalHtml += `
+      <section class="mb-10">
+        <div class="flex items-end justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-base font-semibold">Brand ${escapeHtml(brand)}</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Showing ${grouped[brand].length} items</p>
+          </div>
+          <button class="rounded-2xl border bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50 
+                         dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+            All Products
+          </button>
+        </div>
+
+        <div class="flex gap-4 pb-4 overflow-x-auto sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          ${grouped[brand].map(p => productCard(p)).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  // ៣. បង្ហាញទៅក្នុង Container
+  container.innerHTML = finalHtml || `<div class="text-center py-20 text-slate-500">No products found.</div>`;
 }
 
 // receipt modal (for demo, just shows cart)

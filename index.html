@@ -5,6 +5,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Mini Perfume Shop</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Hanuman:wght@100;300;400;700;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kantumruy+Pro:ital@1&family=Konkhmer+Sleokchher&family=Koulen&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Playwrite+AU+VIC+Guides&family=Playwrite+CO+Guides&family=Roboto:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Yellowtail&display=swap"
+    rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -93,10 +99,59 @@
         </select>
       </div>
     </div>
+    <!-- ipad window -->
+    <nav
+      class="hidden md:flex items-center justify-center gap-10 border-l border-slate-200 dark:border-slate-800 mb-2">
+      <a href="/index.html" class="nav-link">
+        Home
+      </a>
+      <a href="/products/product.html" class="nav-link">
+        Products
+      </a>
+      <a href="/about/about.html" class="nav-link">
+        About me
+      </a>
+    </nav>
+
   </header>
+  <nav
+    class="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/80 backdrop-blur-lg md:hidden dark:bg-slate-950/80 dark:border-slate-800">
+    <div class="flex items-center justify-around py-3">
+      <a href="index.html" id="nav-home"
+        class="nav-item flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 256 256">
+          <path
+            d="M240,208H224V136l2.34,2.34A8,8,0,0,0,237.66,127L139.31,28.68a16,16,0,0,0-22.62,0L18.34,127a8,8,0,0,0,11.32,11.31L32,136v72H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16ZM48,120l80-80,80,80v88H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48Zm96,88H112V160h32Z">
+          </path>
+        </svg>
+        <span class="text-xs font-medium">Home</span>
+      </a>
+
+      <a href="/products/product.html" id="nav-product"
+        class="nav-item flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 256 256">
+          <path
+            d="M232,96a7.89,7.89,0,0,0-.3-2.2L217.35,43.6A16.07,16.07,0,0,0,202,32H54A16.07,16.07,0,0,0,38.65,43.6L24.31,93.8A7.89,7.89,0,0,0,24,96h0v16a40,40,0,0,0,16,32v72a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V144a40,40,0,0,0,16-32V96ZM54,48H202l11.42,40H42.61Zm50,56h48v8a24,24,0,0,1-48,0Zm-16,0v8a24,24,0,0,1-35.12,21.26,7.88,7.88,0,0,0-1.82-1.06A24,24,0,0,1,40,112v-8ZM200,208H56V151.2a40.57,40.57,0,0,0,8,.8,40,40,0,0,0,32-16,40,40,0,0,0,64,0,40,40,0,0,0,32,16,40.57,40.57,0,0,0,8-.8Zm4.93-75.8a8.08,8.08,0,0,0-1.8,1.05A24,24,0,0,1,168,112v-8h48v8A24,24,0,0,1,204.93,132.2Z">
+          </path>
+        </svg>
+        <span class="text-xs font-medium">Product</span>
+      </a>
+
+      <a href="/about/about.html" id="nav-receipt"
+        class="nav-item flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 256 256">
+          <path
+            d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Zm-32-80a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,136Zm0,32a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,168Z">
+          </path>
+        </svg>
+        <span class="text-xs font-medium">About me</span>
+      </a>
+    </div>
+  </nav>
+
 
   <!-- Main -->
-  <main class="mx-auto max-w-6xl px-4 py-8">
+  <main class=" mx-auto max-w-6xl px-4 py-8">
     <!-- Hero -->
     <section class="rounded-3xl border bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -145,7 +200,7 @@
     <section class="mt-8">
       <div class="flex items-end justify-between gap-3">
         <div>
-          <h3 class="text-base font-semibold">Perfumes</h3>
+          <h3 class="text-base font-semibold">Popular Collection</h3>
           <p id="resultsText" class="text-sm text-slate-500 dark:text-slate-400">Showing 0 items</p>
         </div>
 
@@ -155,19 +210,99 @@
         </button>
       </div>
 
-      <div id="productGrid" class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+      <div id="productGrid"
+        class="mt-4 flex gap-4 pb-2 overflow-x-auto sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      </div>
+
+      <div id="detail-modal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-[100]">
+        <div
+          class="bg-white dark:bg-slate-900 max-w-4xl w-full rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row relative border dark:border-slate-800">
+
+          <button onclick="closeDetail()"
+            class="absolute top-4 right-4 bg-gray-400 hover:bg-gray-500 p-2 rounded-full dark:hover:bg-white z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256">
+              <path
+                d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z">
+              </path>
+            </svg>
+          </button>
+
+          <div class="h-100 w-100 bg-gray-100 dark:bg-slate-800">
+            <img id="detail-img" src="" alt="" class="w-full h-full object-cover aspect-square">
+          </div>
+
+          <div class="md:w-1/2 p-6 flex flex-col justify-center">
+            <div class="flex items-center justify-between">
+              <h1 id="detail-title" class="text-3xl font-bold text-gray-900 dark:text-white"></h1>
+              <p id="detail-price" class="text-2xl font-semibold text-gray-900 dark:text-white mt-2"></p>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <p id="detail-brand" class="text-sm font-semibold text-gray-500 dark:text-slate-400 mt-1"></p>
+              <span id="detail-category" class="text-indigo-600 dark:text-indigo-400 text-sm font-semibold"></span>
+            </div>
+
+            <p id="detail-notes" class="mt-2 flex flex-wrap gap-2"></p>
+            <p id="detail-desc" class="text-gray-600 dark:text-slate-400 mt-4 leading-relaxed"></p>
+
+            <div class="mt-5 pt-6 border-t border-gray-200 dark:border-slate-700">
+              <button onclick="closeDetail()"
+                class="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white py-4 rounded-2xl font-bold hover:opacity-90 transition-opacity">
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </section>
 
     <footer class="mt-12 text-center text-xs text-slate-500 dark:text-slate-400">
       © <span id="year"></span> anajak By Sak — mini app 9Perfume
     </footer>
+
+    <!-- <nav
+      class="fixed bottom-0 left-0 right-0 z-1 border-t bg-white/80 backdrop-blur-lg md:hidden dark:bg-slate-950/80 dark:border-slate-800">
+      <div class="flex items-center justify-around py-3">
+        <a href="/index.html" id="nav-home"
+          class="nav-item flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400">
+          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 256 256">
+            <path
+              d="M240,208H224V136l2.34,2.34A8,8,0,0,0,237.66,127L139.31,28.68a16,16,0,0,0-22.62,0L18.34,127a8,8,0,0,0,11.32,11.31L32,136v72H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16ZM48,120l80-80,80,80v88H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48Zm96,88H112V160h32Z">
+            </path>
+          </svg>
+          <span class="text-xs font-medium">Home</span>
+        </a>
+
+        <a href="/products/product.html" id="nav-product"
+          class="nav-item flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400">
+          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 256 256">
+            <path
+              d="M232,96a7.89,7.89,0,0,0-.3-2.2L217.35,43.6A16.07,16.07,0,0,0,202,32H54A16.07,16.07,0,0,0,38.65,43.6L24.31,93.8A7.89,7.89,0,0,0,24,96h0v16a40,40,0,0,0,16,32v72a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V144a40,40,0,0,0,16-32V96ZM54,48H202l11.42,40H42.61Zm50,56h48v8a24,24,0,0,1-48,0Zm-16,0v8a24,24,0,0,1-35.12,21.26,7.88,7.88,0,0,0-1.82-1.06A24,24,0,0,1,40,112v-8ZM200,208H56V151.2a40.57,40.57,0,0,0,8,.8,40,40,0,0,0,32-16,40,40,0,0,0,64,0,40,40,0,0,0,32,16,40.57,40.57,0,0,0,8-.8Zm4.93-75.8a8.08,8.08,0,0,0-1.8,1.05A24,24,0,0,1,168,112v-8h48v8A24,24,0,0,1,204.93,132.2Z">
+            </path>
+          </svg>
+          <span class="text-xs font-medium">Product</span>
+        </a>
+
+        <a href="/receipt/receipt.html" id="nav-receipt"
+          class="nav-item flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400">
+          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 256 256">
+            <path
+              d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Zm-32-80a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,136Zm0,32a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,168Z">
+            </path>
+          </svg>
+          <span class="text-xs font-medium">Receipt</span>
+        </a>
+      </div>
+    </nav> -->
   </main>
 
   <!-- Cart Drawer -->
   <aside id="cartDrawer" class="fixed inset-0 z-40 hidden">
-    <div id="cartOverlay" class="absolute inset-0 bg-black/40"></div>
+    <div id="cartOverlay" class="absolute z-40 inset-0 bg-black/40"></div>
 
-    <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl dark:bg-slate-950">
+    <div class="absolute right-0 top-0 z-40 h-full w-full max-w-md bg-white shadow-xl dark:bg-slate-950">
       <div class="flex items-center justify-between border-b px-5 py-4 dark:border-slate-800">
         <div>
           <h3 class="text-sm font-semibold">Your cart</h3>

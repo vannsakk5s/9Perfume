@@ -1,0 +1,45 @@
+body {
+    font-family: "Google Sans", sans-serif; 
+}
+
+.nav-link{
+  position: relative;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500;    /* font-medium */
+  color: #475569;      /* slate-600 */
+  transition: color 200ms ease;
+}
+
+.nav-link:hover{
+  color: #000;
+}
+
+.nav-link::after{
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  height: 2px;
+  width: 0;
+  background: #000;
+  transform: translateX(-50%);
+  transition: width 300ms ease;
+}
+
+.nav-link:hover::after{
+  width: 80px; /* w-6 */
+}
+
+.nav-link.active{
+  color: #000;
+}
+
+.nav-link.active::after{
+  width: 80px;
+}
+
+/* Dark mode (if you use class="dark" on html/body) */
+.dark .nav-link{ color: #94a3b8; }            /* slate-400 */
+.dark .nav-link:hover{ color: #fff; }
+.dark .nav-link::after{ background: #fff; }
+.dark .nav-link.active{ color: #fff; }
