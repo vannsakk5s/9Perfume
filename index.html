@@ -440,6 +440,12 @@
   </div>
 
   <script src="script.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();        // expand height
+    tg.requestFullscreen(); // FULL SCREEN (important)
+  </script>
 </body>
 
 </html>
