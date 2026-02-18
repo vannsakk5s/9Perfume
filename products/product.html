@@ -183,10 +183,11 @@
                     <img id="detail-img" src="" alt="" class="w-full h-full object-cover aspect-square">
                 </div>
 
-                <div class="md:w-1/2 p-6 flex flex-col justify-center">
+                <div class="md:w-1/2 p-3 md:p-6 flex flex-col justify-center">
                     <div class="flex items-center justify-between">
-                        <h1 id="detail-title" class="text-3xl font-bold text-gray-900 dark:text-white"></h1>
-                        <p id="detail-price" class="text-2xl font-semibold text-gray-900 dark:text-white mt-2"></p>
+                        <h1 id="detail-title" class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white"></h1>
+                        <p id="detail-price" class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white">
+                        </p>
                     </div>
 
                     <div class="flex items-center justify-between">
@@ -195,12 +196,14 @@
                             class="text-indigo-600 dark:text-indigo-400 text-sm font-semibold"></span>
                     </div>
 
-                    <p id="detail-notes" class="mt-2 flex flex-wrap gap-2"></p>
-                    <p id="detail-desc" class="text-gray-600 dark:text-slate-400 mt-4 leading-relaxed"></p>
+                    <p id="detail-notes" class="mt-2 text-xs md:text-sm flex flex-wrap gap-2"></p>
+                    <p class="mt-2 border-t border-gray-200 dark:border-slate-700"></p>
+                    <p id="detail-desc"
+                        class="text-xs md:text-sm text-gray-600 dark:text-slate-400 mt-2 leading-relaxed"></p>
 
-                    <div class="mt-5 pt-6 border-t border-gray-200 dark:border-slate-700">
+                    <div class="mt-4">
                         <button onclick="closeDetail()"
-                            class="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white py-4 rounded-2xl font-bold hover:opacity-90 transition-opacity">
+                            class="w-full text-sm bg-slate-900 dark:bg-white dark:text-slate-900 text-white py-4 rounded-2xl font-bold hover:opacity-90 transition-opacity">
                             Close Preview
                         </button>
                     </div>
