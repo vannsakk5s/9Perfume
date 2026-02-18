@@ -56,24 +56,24 @@ function updateActiveNav() {
 // window
 
 const normalize = (p) => {
-    p = p.split("?")[0].split("#")[0];
-    if (p.endsWith("/")) p += "index.html";           // folder -> index.html
-    p = p.replace(/\/{2,}/g, "/");                    // clean //
-    return p.toLowerCase();
-  };
+  p = p.split("?")[0].split("#")[0];
+  if (p.endsWith("/")) p += "index.html";           // folder -> index.html
+  p = p.replace(/\/{2,}/g, "/");                    // clean //
+  return p.toLowerCase();
+};
 
-  const current = normalize(location.pathname);
+const current = normalize(location.pathname);
 
-  document.querySelectorAll("a.nav-link").forEach((a) => {
-    const href = a.getAttribute("href");
-    if (!href || href.startsWith("http")) return;
+document.querySelectorAll("a.nav-link").forEach((a) => {
+  const href = a.getAttribute("href");
+  if (!href || href.startsWith("http")) return;
 
-    // Convert relative href to an absolute pathname
-    const resolved = new URL(href, location.href);
-    if (normalize(resolved.pathname) === current) {
-      a.classList.add("active");
-    }
-  });
+  // Convert relative href to an absolute pathname
+  const resolved = new URL(href, location.href);
+  if (normalize(resolved.pathname) === current) {
+    a.classList.add("active");
+  }
+});
 
 // ហៅ function ឱ្យដំណើរការ
 document.addEventListener('DOMContentLoaded', updateActiveNav);
@@ -152,6 +152,7 @@ function addToCart(id) {
   saveCart();
   renderCart();
   renderCartBadge();
+  renderProducts();
   showToast("Added to cart ✅");
 }
 
@@ -165,6 +166,7 @@ function setQty(id, qty) {
 
 // ---------- Products render ----------
 function productCard(p) {
+  const quantity = cart[p.id] || 0;
   const chips = p.notes.map(n => `
     <span class="rounded-full border bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600
                  dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">
@@ -206,11 +208,20 @@ function productCard(p) {
         <p class="text-lg font-semibold">
           ${money(p.price)}
         </p>
-        <button onclick="event.stopPropagation(); addToCart('${p.id}')"
-          class="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800
-                 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
-          Add
-        </button>
+        <div class="relative">
+          <button onclick="event.stopPropagation(); addToCart('${p.id}')"
+                  class="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white 
+                         hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+            Add
+          </button>
+        
+          ${quantity > 0 ? `
+            <div class="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border
+                   dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700">
+              <span class="text-slate-900 dark:text-white">${quantity}</span>
+            </div>
+          ` : ''} 
+        </div>
       </div>
     </article>
   `;

@@ -106,10 +106,10 @@
             <a href="../index.html" class="nav-link">
                 Home
             </a>
-            <a href="../products/product.html" class="nav-link">
+            <a href="./product.html" class="nav-link">
                 Products
             </a>
-            <a href="./about.html" class="nav-link">
+            <a href="../about/about.html" class="nav-link">
                 About me
             </a>
         </nav>
@@ -117,7 +117,7 @@
     <nav
         class="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/80 backdrop-blur-lg md:hidden dark:bg-slate-950/80 dark:border-slate-800">
         <div class="flex items-center justify-around py-3">
-            <a href="/index.html" id="nav-home"
+            <a href="../index.html" id="nav-home"
                 class="nav-item flex flex-col w-[55px] items-center gap-1 text-slate-500 dark:text-slate-400">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                     viewBox="0 0 256 256">
@@ -128,7 +128,7 @@
                 <span class="text-xs font-medium">Home</span>
             </a>
 
-            <a href="/products/product.html" id="nav-product"
+            <a href="../products/product.html" id="nav-product"
                 class="nav-item flex flex-col w-[55px] items-center gap-1 text-slate-500 dark:text-slate-400">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                     viewBox="0 0 256 256">
@@ -139,7 +139,7 @@
                 <span class="text-xs font-medium">Product</span>
             </a>
 
-            <a href="about.html" id="nav-receipt"
+            <a href="./about.html" id="nav-receipt"
                 class="nav-item flex flex-col w-[55px] items-center gap-1 text-slate-500 dark:text-slate-400">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                     viewBox="0 0 256 256">
@@ -153,11 +153,149 @@
     </nav>
     <!-- Main -->
     <main class=" mx-auto max-w-6xl px-4 py-8">
-
-
+        <footer class="mt-12 text-center text-xs text-slate-500 dark:text-slate-400">
+            © <span id="year"></span> anajak By Sak — mini app 9Perfume
+        </footer>
 
 
     </main>
+
+    <!-- Cart Drawer -->
+    <aside id="cartDrawer" class="fixed inset-0 z-40 hidden">
+        <div id="cartOverlay" class="absolute inset-0 bg-black/40"></div>
+
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl dark:bg-slate-950">
+            <div class="flex items-center justify-between border-b px-5 py-4 dark:border-slate-800">
+                <div>
+                    <h3 class="text-sm font-semibold">Your cart</h3>
+                    <p id="cartSub" class="text-xs text-slate-500 dark:text-slate-400">0 items</p>
+                </div>
+                <button id="closeCartBtn"
+                    class="rounded-xl px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-900">✕</button>
+            </div>
+
+            <div class="px-5 py-4">
+                <div class="rounded-2xl border bg-slate-50 p-3 dark:bg-slate-900 dark:border-slate-800">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Promo code</p>
+                    <div class="mt-2 flex gap-2">
+                        <input id="promoInput" type="text" placeholder="WELCOME10"
+                            class="flex-1 rounded-xl border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                     dark:bg-slate-950 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15" />
+                        <button id="applyPromo" class="rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800
+                     dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+                            Apply
+                        </button>
+                    </div>
+                    <p id="promoHint" class="mt-2 text-xs text-slate-500 dark:text-slate-400">Try WELCOME10 for 10% off.
+                    </p>
+                </div>
+
+                <ul id="cartItems" class="mt-4 space-y-3"></ul>
+
+                <div id="emptyCart"
+                    class="mt-6 hidden rounded-2xl border bg-white p-5 text-center dark:bg-slate-900 dark:border-slate-800">
+                    <p class="text-sm font-medium">Your cart is empty</p>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Add a perfume to get started.</p>
+                </div>
+            </div>
+
+            <div
+                class="absolute bottom-0 left-0 right-0 border-t bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-950">
+                <div class="space-y-1 text-sm">
+                    <div class="flex justify-between text-slate-600 dark:text-slate-300">
+                        <span>Subtotal</span><span id="subtotalText">$0.00</span>
+                    </div>
+                    <div class="flex justify-between text-slate-600 dark:text-slate-300">
+                        <span>Discount</span><span id="discountText">-$0.00</span>
+                    </div>
+                    <div class="flex justify-between font-semibold">
+                        <span>Total</span><span id="totalText">$0.00</span>
+                    </div>
+                </div>
+
+                <button id="checkoutBtn" class="mt-4 w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50
+                 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+                    Checkout
+                </button>
+
+                <button id="clearCartBtn" class="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-sm font-medium hover:bg-slate-50
+                 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+                    Clear cart
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutBackdrop" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
+        <div class="w-full max-w-lg rounded-3xl bg-white shadow-xl dark:bg-slate-950">
+            <div class="flex items-center justify-between border-b px-6 py-4 dark:border-slate-800">
+                <h3 class="text-sm font-semibold">Checkout</h3>
+                <button id="closeCheckout"
+                    class="rounded-xl px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-900">✕</button>
+            </div>
+
+            <form id="checkoutForm" class="px-6 py-5 space-y-4">
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Full name</label>
+                        <input required id="name"
+                            class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                     bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+                            placeholder="Your name" />
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Phone</label>
+                        <input required id="phone"
+                            class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                     bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+                            placeholder="+855 ..." />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Delivery address</label>
+                    <input required id="address"
+                        class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                   bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+                        placeholder="Street, city, details" />
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Payment</label>
+                        <select id="payment" class="mt-1 w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none hover:bg-slate-50
+                     dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+                            <option>Cash on delivery</option>
+                            <option>Card (demo)</option>
+                            <option>ABA / Bank transfer (demo)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Note</label>
+                        <input id="note"
+                            class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                     bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+                            placeholder="Gift wrap, call before..." />
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border bg-slate-50 p-4 text-sm dark:bg-slate-900 dark:border-slate-800">
+                    <div class="flex justify-between text-slate-600 dark:text-slate-300">
+                        <span>Order total</span><span id="checkoutTotal">$0.00</span>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        This is a demo checkout (no real payments). On submit we’ll “place order” and clear cart.
+                    </p>
+                </div>
+
+                <button class="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800
+                       dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+                    Place order
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- Toast -->
     <div id="toast" class="pointer-events-none fixed bottom-4 right-4 z-[60] hidden max-w-sm rounded-2xl border bg-white px-4 py-3 shadow-lg
@@ -165,7 +303,7 @@
         <p id="toastText" class="text-sm text-slate-800 dark:text-slate-100"></p>
     </div>
 
-    <script src="about.js"></script>
+    <script src="../script.js"></script>
 </body>
 
 </html>
