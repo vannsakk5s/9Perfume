@@ -177,7 +177,7 @@ function productCard(p) {
     <article onclick="showDetail('${p.id}')" class="rounded-3xl min-w-[230px] border bg-white p-1 shadow-sm flex flex-col
                     dark:bg-slate-900 dark:border-slate-800 cursor-pointer hover:shadow-md transition-all">
 
-      <div class="overflow-hidden rounded-t-[20px]">
+      <div class="overflow-hidden rounded-t-[20px] rounded-b-[5px]">
         <img src="${escapeHtml(p.image)}"
              alt="${escapeHtml(p.name)}"
              class="h-48 w-full object-cover" />
