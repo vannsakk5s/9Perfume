@@ -1,6 +1,21 @@
 body {
     font-family: "Google Sans", sans-serif; 
 }
+/* style.css */
+body.no-scroll {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* Optional: Add smooth transition for the drawer */
+#cartDrawer:not(.hidden) > div:last-child {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
 
 .nav-link{
   position: relative;

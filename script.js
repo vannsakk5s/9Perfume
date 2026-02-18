@@ -187,7 +187,7 @@ function productCard(p) {
         <div class="w-full">
           <div class="flex items-center justify-between">
             <h4 class="text-base font-semibold">
-              ${escapeHtml(p.name)}
+              ${p.name.length > 12 ? escapeHtml(p.name.slice(0, 12)) + '...' : escapeHtml(p.name)}
             </h4>
             <p class="text-xs text-slate-500 dark:text-slate-400">
               ${escapeHtml(p.brand)}
@@ -299,8 +299,31 @@ function openReceiptModal() {
 
 // ---------- Cart drawer ----------
 const cartDrawer = document.getElementById("cartDrawer");
-const openCart = () => { cartDrawer.classList.remove("hidden"); };
-const closeCart = () => { cartDrawer.classList.add("hidden"); };
+const openCart = () => {
+  const drawer = document.getElementById("cartDrawer");
+  drawer.classList.remove("hidden");
+  document.body.classList.add("no-scroll"); // Lock background
+  renderCart();
+};
+
+const closeCart = () => {
+  const drawer = document.getElementById("cartDrawer");
+  drawer.classList.add("hidden");
+  document.body.classList.remove("no-scroll"); // Unlock background
+};
+
+// function showDetail(id) {
+//   // ... existing logic to find product ...
+//   $("#detail-modal").classList.remove("hidden");
+//   $("#detail-modal").classList.add("flex");
+//   document.body.classList.add("no-scroll"); // Lock background
+// }
+
+// function closeDetail() {
+//   $("#detail-modal").classList.add("hidden");
+//   $("#detail-modal").classList.remove("flex");
+//   document.body.classList.remove("no-scroll"); // Unlock background
+// }
 
 $("#openCartBtn").addEventListener("click", () => { openCart(); renderCart(); });
 $("#closeCartBtn").addEventListener("click", closeCart);

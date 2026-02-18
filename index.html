@@ -100,8 +100,7 @@
       </div>
     </div>
     <!-- ipad window -->
-    <nav
-      class="hidden md:flex items-center justify-center gap-10 border-l border-slate-200 dark:border-slate-800 mb-2">
+    <nav class="hidden md:flex items-center justify-center gap-10 border-l border-slate-200 dark:border-slate-800 mb-2">
       <a href="/index.html" class="nav-link">
         Home
       </a>
@@ -300,10 +299,11 @@
   </main>
 
   <!-- Cart Drawer -->
-  <aside id="cartDrawer" class="fixed inset-0 z-40 hidden">
-    <div id="cartOverlay" class="absolute z-40 inset-0 bg-black/40"></div>
+  <aside id="cartDrawer" class="fixed inset-0 z-[110] hidden">
+    <div id="cartOverlay" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
 
-    <div class="absolute right-0 top-0 z-40 h-full w-full max-w-md bg-white shadow-xl dark:bg-slate-950">
+    <div class="absolute right-0 top-0 h-[100dvh] w-full max-w-md bg-white shadow-xl dark:bg-slate-950 flex flex-col">
+
       <div class="flex items-center justify-between border-b px-5 py-4 dark:border-slate-800">
         <div>
           <h3 class="text-sm font-semibold">Your cart</h3>
@@ -313,15 +313,14 @@
           class="rounded-xl px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-900">✕</button>
       </div>
 
-      <div class="px-5 py-4">
+      <div class="flex-1 overflow-y-auto px-5 py-4">
         <div class="rounded-2xl border bg-slate-50 p-3 dark:bg-slate-900 dark:border-slate-800">
           <p class="text-xs text-slate-500 dark:text-slate-400">Promo code</p>
           <div class="mt-2 flex gap-2">
-            <input id="promoInput" type="text" placeholder="WELCOME10"
-              class="flex-1 rounded-xl border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
-                     dark:bg-slate-950 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15" />
+            <input id="promoInput" type="text" placeholder="WELCOME10" class="flex-1 rounded-xl border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                   dark:bg-slate-950 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15" />
             <button id="applyPromo" class="rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800
-                     dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+                   dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
               Apply
             </button>
           </div>
@@ -337,7 +336,7 @@
         </div>
       </div>
 
-      <div class="absolute bottom-0 left-0 right-0 border-t bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-950">
+      <div class="border-t bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-950 pb-safe">
         <div class="space-y-1 text-sm">
           <div class="flex justify-between text-slate-600 dark:text-slate-300">
             <span>Subtotal</span><span id="subtotalText">$0.00</span>
@@ -351,12 +350,12 @@
         </div>
 
         <button id="checkoutBtn" class="mt-4 w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50
-                 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+               dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
           Checkout
         </button>
 
         <button id="clearCartBtn" class="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-sm font-medium hover:bg-slate-50
-                 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+               dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
           Clear cart
         </button>
       </div>
@@ -364,7 +363,7 @@
   </aside>
 
   <!-- Checkout Modal -->
-  <div id="checkoutBackdrop" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
+  <div id="checkoutBackdrop" class="fixed inset-0 z-[150] hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-lg rounded-3xl bg-white shadow-xl dark:bg-slate-950">
       <div class="flex items-center justify-between border-b px-6 py-4 dark:border-slate-800">
         <h3 class="text-sm font-semibold">Checkout</h3>
