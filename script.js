@@ -174,16 +174,16 @@ function productCard(p) {
   `).join("");
 
   return `
-    <article onclick="showDetail('${p.id}')" class="rounded-3xl min-w-[230px] border bg-white p-3 shadow-sm flex flex-col
+    <article onclick="showDetail('${p.id}')" class="rounded-3xl min-w-[230px] border bg-white p-1 shadow-sm flex flex-col
                     dark:bg-slate-900 dark:border-slate-800 cursor-pointer hover:shadow-md transition-all">
 
-      <div class="mb-4 overflow-hidden rounded-2xl">
+      <div class="overflow-hidden rounded-t-[20px]">
         <img src="${escapeHtml(p.image)}"
              alt="${escapeHtml(p.name)}"
              class="h-48 w-full object-cover" />
       </div>
 
-      <div class="flex items-start justify-between gap-1">
+      <div class="flex mt-2 pl-2 pr-2 items-start justify-between gap-1">
         <div class="w-full">
           <div class="flex items-center justify-between">
             <h4 class="text-base font-semibold">
@@ -199,11 +199,11 @@ function productCard(p) {
         </div>
       </div>
 
-      <div class="mt-2 flex flex-wrap gap-2">
+      <div class="mt-2 pl-2 pr-2 flex flex-wrap gap-2">
         ${chips}
       </div>
 
-      <div class="mt-2 flex items-center justify-between">
+      <div class="mt-2 mb-2 pl-2 pr-2 flex items-center justify-between">
         <p class="text-lg font-semibold">
           ${money(p.price)}
         </p>
