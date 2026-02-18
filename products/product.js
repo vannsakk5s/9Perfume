@@ -175,57 +175,42 @@ function productCard(p) {
   `).join("");
 
   return `
-    <article onclick="showDetail('${p.id}')" class="rounded-3xl min-w-[230px] border bg-white p-1 shadow-sm flex flex-col
-                    dark:bg-slate-900 dark:border-slate-800 cursor-pointer hover:shadow-md transition-all">
+  <article onclick="showDetail('${p.id}')" class="rounded-3xl min-w-[230px] border bg-white p-1 shadow-sm flex flex-col
+                   dark:bg-slate-900 dark:border-slate-800 cursor-pointer hover:shadow-md transition-all">
 
-      <div class="overflow-hidden rounded-t-[20px] rounded-b-[5px]">
-        <img src="${escapeHtml(p.image)}"
-             alt="${escapeHtml(p.name)}"
-             class="h-48 w-full object-cover" />
+    <div class="overflow-hidden rounded-t-[20px] rounded-b-[5px]">
+      <img src="${escapeHtml(p.image)}" class="h-48 w-full object-cover" />
+    </div>
+
+    <div class="p-2">
+      <div class="flex items-center justify-between">
+        <h4 class="text-base font-semibold">${escapeHtml(p.name)}</h4>
+        <p class="text-xs text-slate-500">${escapeHtml(p.brand)}</p>
       </div>
+      <p class="mt-1 text-xs text-slate-500">${escapeHtml(p.vibe)} • ${escapeHtml(p.size)}</p>
+    </div>
 
-      <div class="flex mt-2 pl-2 pr-2 items-start justify-between gap-1">
-        <div class="w-full">
-          <div class="flex items-center justify-between">
-            <h4 class="text-base font-semibold">
-              ${escapeHtml(p.name)}
-            </h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">
-              ${escapeHtml(p.brand)}
-            </p>
+    <div class="mt-auto p-2 flex items-center justify-between">
+      <p class="text-lg font-semibold">
+        ${money(p.price)}
+      </p>
+
+      <div class="relative">
+        <button onclick="event.stopPropagation(); addToCart('${p.id}')"
+                class="rounded-2xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white 
+                       hover:bg-slate-800 dark:bg-white dark:text-slate-900">
+          Add
+        </button>
+      
+        ${quantity > 0 ? `
+          <div class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[10px] font-bold text-slate-900 shadow-md border border-slate-200 dark:bg-slate-800 dark:text-white dark:border-slate-700 animate-in zoom-in duration-200">
+            ${quantity}
           </div>
-          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            ${escapeHtml(p.vibe)} • ${escapeHtml(p.size)}
-          </p>
-        </div>
+        ` : ''} 
       </div>
-
-      <div class="mt-2 pl-2 pr-2 flex flex-wrap gap-2">
-        ${chips}
-      </div>
-
-      <div class="mt-2 mb-2 pl-2 pr-2 flex items-center justify-between">
-        <p class="text-lg font-semibold">
-          ${money(p.price)}
-        </p>
-        <div class="relative">
-          <button onclick="event.stopPropagation(); addToCart('${p.id}')"
-                  class="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white 
-                         hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
-            Add
-          </button>
-        
-          
-          ${quantity > 0 ? `
-            <div class="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border
-                   dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700">
-              <span class="text-slate-900 dark:text-white">${quantity}</span>
-            </div>
-          ` : ''} 
-        </div>
-      </div>
-    </article>
-  `;
+    </div>
+  </article>
+`;
 }
 
 // ----------- Show Product Detail ----------
