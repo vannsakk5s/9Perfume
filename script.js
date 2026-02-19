@@ -544,38 +544,79 @@ document.addEventListener("DOMContentLoaded", () => {
   renderCart();
 });
 
+// $("#checkoutForm").addEventListener("submit", async (e) => {
+//   e.preventDefault();
+
+//   // 1. Safe Selection: Check if elements exist before getting .value
+//   const phoneEl = $("#phone");
+//   const addressEl = $("#address");
+//   const noteEl = $("#note");
+
+//   if (!phoneEl || !addressEl) {
+//     showToast("Missing form fields! ❌");
+//     return;
+//   }
+
+//   // 2. Get Telegram Data (if running inside Telegram)
+//   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  
+//   const orderData = {
+//     telegramId: tgUser?.id?.toString() || "WEB_USER",
+//     firstName: tgUser?.first_name || "Guest",
+//     phone: phoneEl.value.trim(),
+//     address: addressEl.value.trim(),
+//     note: noteEl ? noteEl.value.trim() : "",
+//     items: Object.entries(cart).map(([id, qty]) => {
+//       const p = PRODUCTS.find(x => x.id === id);
+//       return { id, name: p?.name, price: p?.price, qty };
+//     }),
+//     total: total().toFixed(2)
+//   };
+
+//   // 3. Send to Backend
+//   try {
+//     const response = await fetch('https://consult-solutions-cage-beauty.trycloudflare.com/api/place-order', {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify(orderData)
+//     });
+
+//     const result = await response.json();
+
+//     if (result.success) {
+//       showToast("Order Success! ✅");
+//       cart = {};
+//       saveCart();
+//       renderCartBadge();
+//       renderCart();
+//       closeCheckout();
+//       e.target.reset();
+//     } else {
+//       showToast("Error: " + result.error);
+//     }
+//   } catch (err) {
+//     console.error("Fetch Error:", err);
+//     showToast("Server Connection Failed ❌");
+//   }
+// });
+
 $("#checkoutForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // 1. Safe Selection: Check if elements exist before getting .value
-  const phoneEl = $("#phone");
-  const addressEl = $("#address");
-  const noteEl = $("#note");
-
-  if (!phoneEl || !addressEl) {
-    showToast("Missing form fields! ❌");
-    return;
-  }
-
-  // 2. Get Telegram Data (if running inside Telegram)
-  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  const payBtn = $("#payBtn");
   
-  const orderData = {
-    telegramId: tgUser?.id?.toString() || "WEB_USER",
-    firstName: tgUser?.first_name || "Guest",
-    phone: phoneEl.value.trim(),
-    address: addressEl.value.trim(),
-    note: noteEl ? noteEl.value.trim() : "",
-    items: Object.entries(cart).map(([id, qty]) => {
-      const p = PRODUCTS.find(x => x.id === id);
-      return { id, name: p?.name, price: p?.price, qty };
-    }),
-    total: total().toFixed(2)
-  };
+  // 1. Prevent double clicks
+  if (payBtn.disabled) return; 
 
-  // 3. Send to Backend
+  // 2. Change UI to "Loading" state
+  payBtn.disabled = true;
+  payBtn.textContent = "Processing...";
+  payBtn.classList.add("opacity-50", "cursor-not-allowed");
+
   try {
-    const response = await fetch('https://consult-solutions-cage-beauty.trycloudflare.com/api/place-order', {
+    // ... your existing orderData gathering logic ...
+
+    const response = await fetch('http://localhost:3000/api/place-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData)
@@ -585,17 +626,19 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 
     if (result.success) {
       showToast("Order Success! ✅");
-      cart = {};
-      saveCart();
-      renderCartBadge();
-      renderCart();
-      closeCheckout();
-      e.target.reset();
+      // ... clear cart and close modal ...
     } else {
       showToast("Error: " + result.error);
+      // Re-enable if there was a business logic error
+      payBtn.disabled = false;
+      payBtn.textContent = "Pay Now";
+      payBtn.classList.remove("opacity-50", "cursor-not-allowed");
     }
   } catch (err) {
-    console.error("Fetch Error:", err);
     showToast("Server Connection Failed ❌");
+    // 3. Re-enable button on network error so user can try again
+    payBtn.disabled = false;
+    payBtn.textContent = "Pay Now";
+    payBtn.classList.remove("opacity-50", "cursor-not-allowed");
   }
 });
