@@ -547,24 +547,33 @@ document.addEventListener("DOMContentLoaded", () => {
 $("#checkoutForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // For a Telegram Web App, you can get the ID from window.Telegram.WebApp
-  // If testing in a browser, you'll need to provide a test ID manually
-  const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || "TEST_ID";
-  const firstName = window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || "Guest";
+  // 1. Safe Selection: Check if elements exist before getting .value
+  const phoneEl = $("#phone");
+  const addressEl = $("#address");
+  const noteEl = $("#note");
 
+  if (!phoneEl || !addressEl) {
+    showToast("Missing form fields! ❌");
+    return;
+  }
+
+  // 2. Get Telegram Data (if running inside Telegram)
+  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  
   const orderData = {
-    telegramId: telegramId,
-    firstName: firstName,
-    phone: $("#phone").value.trim(),
-    address: $("#address").value.trim(),
-    note: $("#note").value.trim(),
+    telegramId: tgUser?.id?.toString() || "WEB_USER",
+    firstName: tgUser?.first_name || "Guest",
+    phone: phoneEl.value.trim(),
+    address: addressEl.value.trim(),
+    note: noteEl ? noteEl.value.trim() : "",
     items: Object.entries(cart).map(([id, qty]) => {
       const p = PRODUCTS.find(x => x.id === id);
       return { id, name: p?.name, price: p?.price, qty };
     }),
-    total: total().toFixed(2), // Ensure it's a string/fixed number
+    total: total().toFixed(2)
   };
 
+  // 3. Send to Backend
   try {
     const response = await fetch('http://localhost:3000/api/place-order', {
       method: 'POST',
@@ -575,25 +584,18 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
     const result = await response.json();
 
     if (result.success) {
-      showToast("Order placed ✅");
-      // Reset App State
+      showToast("Order Success! ✅");
       cart = {};
       saveCart();
-      promo.codeApplied = false;
-      savePromo();
       renderCartBadge();
       renderCart();
       closeCheckout();
-      closeCart();
       e.target.reset();
-      
-      // Close Telegram WebApp after success if needed
-      // window.Telegram.WebApp.close();
     } else {
       showToast("Error: " + result.error);
     }
   } catch (err) {
-    console.error("Submission error:", err);
-    showToast("Server error. Try again.");
+    console.error("Fetch Error:", err);
+    showToast("Server Connection Failed ❌");
   }
 });
