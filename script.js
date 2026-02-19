@@ -547,6 +547,9 @@ document.addEventListener("DOMContentLoaded", () => {
 $("#checkoutForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  const payBtn = e.target.querySelector('button[type="submit"]');
+  if (payBtn.disabled) return; // Stop here if already processing
+
   // 1. Safe Selection: Check if elements exist before getting .value
   const phoneEl = $("#phone");
   const addressEl = $("#address");
@@ -556,6 +559,11 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
     showToast("Missing form fields! ❌");
     return;
   }
+
+  payBtn.disabled = true;
+  const originalText = payBtn.textContent;
+  payBtn.textContent = "Processing..."; // Give user feedback
+  payBtn.style.opacity = "0.5";
 
   // 2. Get Telegram Data (if running inside Telegram)
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
@@ -593,9 +601,17 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
       e.target.reset();
     } else {
       showToast("Error: " + result.error);
+      // Re-enable if server rejected it
+      payBtn.disabled = false;
+      payBtn.textContent = originalText;
+      payBtn.style.opacity = "1";
     }
   } catch (err) {
     console.error("Fetch Error:", err);
     showToast("Server Connection Failed ❌");
+    // Re-enable so user can try again if it was just a network glitch
+    payBtn.disabled = false;
+    payBtn.textContent = originalText;
+    payBtn.style.opacity = "1";
   }
 });
