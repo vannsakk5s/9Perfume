@@ -543,3 +543,57 @@ document.addEventListener("DOMContentLoaded", () => {
   renderCartBadge();
   renderCart();
 });
+
+$("#checkoutForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  // For a Telegram Web App, you can get the ID from window.Telegram.WebApp
+  // If testing in a browser, you'll need to provide a test ID manually
+  const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || "TEST_ID";
+  const firstName = window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || "Guest";
+
+  const orderData = {
+    telegramId: telegramId,
+    firstName: firstName,
+    phone: $("#phone").value.trim(),
+    address: $("#address").value.trim(),
+    note: $("#note").value.trim(),
+    items: Object.entries(cart).map(([id, qty]) => {
+      const p = PRODUCTS.find(x => x.id === id);
+      return { id, name: p?.name, price: p?.price, qty };
+    }),
+    total: total().toFixed(2), // Ensure it's a string/fixed number
+  };
+
+  try {
+    const response = await fetch('http://localhost:3000/api/place-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      showToast("Order placed ✅");
+      // Reset App State
+      cart = {};
+      saveCart();
+      promo.codeApplied = false;
+      savePromo();
+      renderCartBadge();
+      renderCart();
+      closeCheckout();
+      closeCart();
+      e.target.reset();
+      
+      // Close Telegram WebApp after success if needed
+      // window.Telegram.WebApp.close();
+    } else {
+      showToast("Error: " + result.error);
+    }
+  } catch (err) {
+    console.error("Submission error:", err);
+    showToast("Server error. Try again.");
+  }
+});
