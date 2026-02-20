@@ -571,7 +571,7 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
   // បង្ហាញ Loading State
   payBtn.disabled = true;
   const originalText = payBtn.textContent;
-  payBtn.textContent = "កំពុងដំណើរការ...";
+  payBtn.textContent = "Processing...";
   payBtn.classList.add("opacity-50", "cursor-not-allowed");
 
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
@@ -600,7 +600,7 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
     const result = await response.json();
 
     if (result.success) {
-      showToast("ការកម្ម៉ង់បានជោគជ័យ! ✅");
+      showToast("Successfuly Order! ✅");
       // សម្អាតទិន្នន័យ
       cart = {};
       saveCart();

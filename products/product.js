@@ -217,6 +217,11 @@ function productCard(p) {
                          hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
             Add
           </button>
+          <button type="button" onclick="event.stopPropagation(); addToCart('${p.id}')"
+                  class="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white 
+                         hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+            Add
+          </button>
         
           
           ${quantity > 0 ? `
@@ -596,7 +601,7 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
   // បង្ហាញ Loading State
   payBtn.disabled = true;
   const originalText = payBtn.textContent;
-  payBtn.textContent = "កំពុងដំណើរការ...";
+  payBtn.textContent = "Processing...";
   payBtn.classList.add("opacity-50", "cursor-not-allowed");
 
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
@@ -625,13 +630,13 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
     const result = await response.json();
 
     if (result.success) {
-      showToast("ការកម្ម៉ង់បានជោគជ័យ! ✅");
+      showToast("Successfuly Order! ✅");
       // សម្អាតទិន្នន័យ
       cart = {};
       saveCart();
       promo.codeApplied = false;
       savePromo();
-      
+
       // Update UI
       renderCartBadge();
       renderCart();
