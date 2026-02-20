@@ -578,83 +578,82 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// $("#checkoutForm").addEventListener("submit", async (e) => {
-//   e.preventDefault();
+$("#checkoutForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-//   const payBtn = e.target.querySelector('button[type="submit"]');
-//   if (payBtn.disabled) return; // Stop here if already processing
+  const payBtn = e.target.querySelector('button[type="submit"]');
+  if (payBtn.disabled) return; // Stop here if already processing
 
-//   // 1. Safe Selection: Check if elements exist before getting .value
-//   const phoneEl = $("#phone");
-//   const addressEl = $("#address");
-//   const noteEl = $("#note");
+  // 1. Safe Selection: Check if elements exist before getting .value
+  const phoneEl = $("#phone");
+  const addressEl = $("#address");
+  const noteEl = $("#note");
 
-//   if (!phoneEl || !addressEl) {
-//     showToast("Missing form fields! ❌");
-//     return;
-//   }
+  if (!phoneEl || !addressEl) {
+    showToast("Missing form fields! ❌");
+    return;
+  }
 
-//   payBtn.disabled = true;
-//   const originalText = payBtn.textContent;
-//   payBtn.textContent = "Processing..."; // Give user feedback
-//   payBtn.style.opacity = "0.5";
+  payBtn.disabled = true;
+  const originalText = payBtn.textContent;
+  payBtn.textContent = "Processing..."; // Give user feedback
+  payBtn.style.opacity = "0.5";
 
-//   // 2. Get Telegram Data (if running inside Telegram)
-//   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  // 2. Get Telegram Data (if running inside Telegram)
+  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
   
-//   const orderData = {
-//     telegramId: tgUser?.id?.toString() || "WEB_USER",
-//     firstName: tgUser?.first_name || "Guest",
-//     phone: phoneEl.value.trim(),
-//     address: addressEl.value.trim(),
-//     note: noteEl ? noteEl.value.trim() : "",
-//     items: Object.entries(cart).map(([id, qty]) => {
-//       const p = PRODUCTS.find(x => x.id === id);
-//       return { id, name: p?.name, price: p?.price, qty };
-//     }),
-//     total: total().toFixed(2)
-//   };
+  const orderData = {
+    telegramId: tgUser?.id?.toString() || "WEB_USER",
+    firstName: tgUser?.first_name || "Guest",
+    phone: phoneEl.value.trim(),
+    address: addressEl.value.trim(),
+    note: noteEl ? noteEl.value.trim() : "",
+    items: Object.entries(cart).map(([id, qty]) => {
+      const p = PRODUCTS.find(x => x.id === id);
+      return { id, name: p?.name, price: p?.price, qty };
+    }),
+    total: total().toFixed(2)
+  };
 
-//   // 3. Send to Backend
-//   try {
-//     const response = await fetch('https://kevin-compete-antique-agrees.trycloudflare.com/api/place-order', {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(orderData)
-//     });
+  // 3. Send to Backend
+  try {
+    const response = await fetch('https://kevin-compete-antique-agrees.trycloudflare.com/api/place-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
 
-//     const result = await response.json();
+    const result = await response.json();
 
-//     if (result.success) {
-//       showToast("Order Success! ✅");
-//       cart = {};
-//       saveCart();
-//       renderCartBadge();
-//       renderCart();
-//       closeCheckout();
-//       e.target.reset();
-//     } else {
-//       showToast("Error: " + result.error);
-//       // Re-enable if server rejected it
-//       payBtn.disabled = false;
-//       payBtn.textContent = originalText;
-//       payBtn.style.opacity = "1";
-//     }
-//   } catch (err) {
-//     console.error("Fetch Error:", err);
-//     showToast("Server Connection Failed ❌");
-//     // Re-enable so user can try again if it was just a network glitch
-//     payBtn.disabled = false;
-//     payBtn.textContent = originalText;
-//     payBtn.style.opacity = "1";
-//   }
-// });
+    if (result.success) {
+      showToast("Order Success! ✅");
+      cart = {};
+      saveCart();
+      renderCartBadge();
+      renderCart();
+      closeCheckout();
+      e.target.reset();
+    } else {
+      showToast("Error: " + result.error);
+      // Re-enable if server rejected it
+      payBtn.disabled = false;
+      payBtn.textContent = originalText;
+      payBtn.style.opacity = "1";
+    }
+  } catch (err) {
+    console.error("Fetch Error:", err);
+    showToast("Server Connection Failed ❌");
+    // Re-enable so user can try again if it was just a network glitch
+    payBtn.disabled = false;
+    payBtn.textContent = originalText;
+    payBtn.style.opacity = "1";
+  }
+});
 
 // Map
 let map, marker;
-let currentCoords = null; 
+let currentCoords = null; // សម្រាប់រក្សាទុក Lat/Lng
 
-// ១. មុខងារបើកផែនទី
 function openMapModal() {
   const container = document.getElementById('map-container');
   container.classList.toggle('hidden');
@@ -662,8 +661,6 @@ function openMapModal() {
   if (!map) {
     map = L.map('map').setView([11.5564, 104.9282], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    
-    // បង្កើត Marker ពណ៌ខៀវដែលអាចអូសបាន
     marker = L.marker([11.5564, 104.9282], { draggable: true }).addTo(map);
 
     marker.on('dragend', function() {
@@ -674,7 +671,7 @@ function openMapModal() {
   }
 }
 
-// ២. មុខងារស្វែងរកទីតាំង
+// មុខងារស្វែងរកទីតាំង (Search)
 async function searchLocation() {
   const query = document.getElementById('search-input').value;
   if (!query) return;
@@ -682,31 +679,40 @@ async function searchLocation() {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
     const data = await res.json();
+    
     if (data.length > 0) {
       const { lat, lon, display_name } = data[0];
       const newPos = [parseFloat(lat), parseFloat(lon)];
+      
       map.setView(newPos, 16);
       marker.setLatLng(newPos);
       currentCoords = { lat: parseFloat(lat), lng: parseFloat(lon) };
       document.getElementById('address').value = display_name;
+    } else {
+      alert("រកមិនឃើញទីតាំងនេះទេ!");
     }
-  } catch (e) { console.error("Search error", e); }
+  } catch (error) {
+    console.error("Search error:", error);
+  }
 }
 
-// ៣. មុខងារចាប់ទីតាំងបច្ចុប្បន្ន
+// មុខងារចាប់យកទីតាំងបច្ចុប្បន្ន (Current Location)
 function getCurrentLocation() {
-  if (!navigator.geolocation) return alert("Browser មិនគាំទ្រ Geolocation");
+  if (!navigator.geolocation) return alert("Browser របស់អ្នកមិនគាំទ្រការចាប់ទីតាំងទេ");
+
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const { latitude, longitude } = pos.coords;
     const newPos = [latitude, longitude];
+    
     map.setView(newPos, 16);
     marker.setLatLng(newPos);
     currentCoords = { lat: latitude, lng: longitude };
     await updateAddressFromCoords(latitude, longitude);
+  }, (err) => {
+    alert("មិនអាចចាប់យកទីតាំងបានទេ៖ " + err.message);
   });
 }
 
-// ៤. ប្តូរកូអរដោនេជាអាសយដ្ឋានអក្សរ
 async function updateAddressFromCoords(lat, lng) {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
@@ -715,52 +721,7 @@ async function updateAddressFromCoords(lat, lng) {
       document.getElementById('address').value = data.display_name;
       currentCoords = { lat, lng };
     }
-  } catch (e) { console.log("Error finding address", e); }
-}
-
-// ៥. កែសម្រួលការកុម្ម៉ង់ (Submit Order)
-$("#checkoutForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const payBtn = e.target.querySelector('button[type="submit"]');
-  if (payBtn.disabled) return;
-
-  const phoneEl = $("#phone");
-  const addressEl = $("#address");
-
-  if (!phoneEl.value || !addressEl.value) return showToast("សូមបំពេញព័ត៌មានឱ្យគ្រប់ ❌");
-
-  payBtn.disabled = true;
-  payBtn.textContent = "Processing...";
-  
-  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-
-  const orderData = {
-    telegramId: tgUser?.id?.toString() || "WEB_USER",
-    firstName: tgUser?.first_name || "Guest",
-    phone: phoneEl.value.trim(),
-    address: addressEl.value.trim(),
-    note: $("#note").value.trim(),
-    items: Object.entries(cart).map(([id, qty]) => {
-      const p = PRODUCTS.find(x => x.id === id);
-      return { id, name: p?.name, price: p?.price, qty };
-    }),
-    total: total().toFixed(2),
-    location: currentCoords // បញ្ជូន Lat/Lng ទៅ Backend
-  };
-
-  try {
-    const response = await fetch('https://kevin-compete-antique-agrees.trycloudflare.com/api/place-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    });
-    const result = await response.json();
-    if (result.success) {
-      showToast("Order Success! ✅");
-      cart = {}; saveCart(); renderCartBadge(); renderCart(); closeCheckout(); e.target.reset();
-    }
-  } catch (err) {
-    showToast("Server Connection Failed ❌");
-    payBtn.disabled = false; payBtn.textContent = "Pay";
+  } catch (error) {
+    console.log("រកមិនឃើញអាសយដ្ឋាន:", error);
   }
-});
+}
