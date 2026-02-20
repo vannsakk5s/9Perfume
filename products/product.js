@@ -149,13 +149,15 @@ function total() {
   const sub = subtotal();
   return Math.max(0, sub - discountAmount(sub));
 }
+function updateSingleProductBadge(id) {
+  renderProducts(); // ប្រសិនបើអ្នកចង់ឱ្យងាយស្រួល គ្រាន់តែទុកវាដដែល ប៉ុន្តែបន្ថែម type="button" ខាងលើសិន
+}
 
 function addToCart(id) {
   cart[id] = (cart[id] || 0) + 1;
   saveCart();
   renderCart();
-  renderCartBadge();
-  renderProducts();
+  renderCartBadge();updateSingleProductBadge(id);
   showToast("Added to cart ✅");
 }
 
