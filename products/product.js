@@ -212,11 +212,6 @@ function productCard(p) {
           ${money(p.price)}
         </p>
         <div class="relative">
-          <button onclick="event.stopPropagation(); addToCart('${p.id}')"
-                  class="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white 
-                         hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
-            Add
-          </button>
           <button type="button" onclick="event.stopPropagation(); addToCart('${p.id}')"
                   class="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white 
                          hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
