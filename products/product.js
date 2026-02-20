@@ -578,31 +578,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // --- បញ្ចូលគ្នា៖ Checkout Form Submission (កំណែទម្រង់សុវត្ថិភាពខ្ពស់) ---
+// --- Checkout Form Submission (កំណែទម្រង់ផ្ញើទៅកាន់ API) ---
 $("#checkoutForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const payBtn = e.target.querySelector('button[type="submit"]');
+  const payBtn = document.getElementById("payBtn");
   if (payBtn?.disabled) return;
 
-  // ប្រើ document.getElementById និង ?.value ដើម្បីការពារ Error Null
+  // ១. ទាញយកព័ត៌មានពី Input
   const phoneValue = document.getElementById("phone")?.value.trim();
   const addressValue = document.getElementById("address")?.value.trim();
   const noteValue = document.getElementById("note")?.value.trim() || "";
 
-  // ត្រួតពិនិត្យទិន្នន័យចាំបាច់
+  // ២. ត្រួតពិនិត្យទិន្នន័យ
   if (!phoneValue || !addressValue) {
     showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
     return;
   }
 
-  // បង្ហាញ Loading State
+  // ៣. បង្ហាញស្ថានភាពកំពុងផ្ញើ (Loading)
   payBtn.disabled = true;
   const originalText = payBtn.textContent;
-  payBtn.textContent = "កំពុងដំណើរការ...";
+  payBtn.textContent = "កំពុងផ្ញើទិន្នន័យ...";
   payBtn.classList.add("opacity-50", "cursor-not-allowed");
 
+  // ៤. រៀបចំទិន្នន័យសម្រាប់ផ្ញើ
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-
   const orderData = {
     telegramId: tgUser?.id?.toString() || "WEB_USER",
     firstName: tgUser?.first_name || "Guest",
@@ -614,10 +615,11 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
       return p ? { id, name: p.name, price: p.price, qty } : null;
     }).filter(Boolean),
     total: total().toFixed(2),
-    location: currentCoords // ប្រសិនបើអ្នកមិនទាន់ចុចលើ Map វានឹងផ្ញើ null
+    location: currentCoords // Lat/Lng ពី Map
   };
 
   try {
+    // ៥. ផ្ញើទៅកាន់ API
     const response = await fetch('https://kevin-compete-antique-agrees.trycloudflare.com/api/place-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -627,29 +629,31 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
     const result = await response.json();
 
     if (result.success) {
-      showToast("ការកម្ម៉ង់បានជោគជ័យ! ✅");
+      showToast("ការកម្ម៉ង់បានជោគជ័យ និងផ្ញើទៅកាន់ Bot! ✅");
+      
+      // សម្អាត Cart
       cart = {};
       saveCart();
       promo.codeApplied = false;
       savePromo();
       
+      // Update UI
       renderCartBadge();
       renderCart();
       closeCheckout();
       closeCart();
       e.target.reset();
     } else {
-      throw new Error(result.error || "Server rejected the order");
+      throw new Error(result.error || "Server rejected");
     }
   } catch (err) {
     console.error("Fetch Error:", err);
-    showToast("ការតភ្ជាប់មានបញ្ហា ឬ URL មិនត្រឹមត្រូវ ❌");
+    showToast("ការតភ្ជាប់ទៅកាន់ Bot មានបញ្ហា! ❌");
   } finally {
-    if (payBtn) {
-      payBtn.disabled = false;
-      payBtn.textContent = originalText;
-      payBtn.classList.remove("opacity-50", "cursor-not-allowed");
-    }
+    // ៦. ដាក់ឱ្យប៊ូតុងដំណើរការវិញ
+    payBtn.disabled = false;
+    payBtn.textContent = originalText;
+    payBtn.classList.remove("opacity-50", "cursor-not-allowed");
   }
 });
 
