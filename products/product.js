@@ -579,16 +579,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // --- បញ្ចូលគ្នា៖ Checkout Form Submission (កំណែទម្រង់សុវត្ថិភាពខ្ពស់) ---
 // --- Checkout Form Submission (កំណែទម្រង់ផ្ញើទៅកាន់ API) ---
+// --- Checkout Form Submission សម្រាប់ទំព័រ Product ---
 $("#checkoutForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const payBtn = document.getElementById("payBtn");
+  const payBtn = $("#payBtn"); // ប្រើ $ ជំនួស document.getElementById
   if (payBtn?.disabled) return;
 
-  // ១. ទាញយកព័ត៌មានពី Input
-  const phoneValue = document.getElementById("phone")?.value.trim();
-  const addressValue = document.getElementById("address")?.value.trim();
-  const noteValue = document.getElementById("note")?.value.trim() || "";
+  // ១. ទាញយកព័ត៌មានពី Input (ប្រើ $ ដើម្បីឱ្យប្រាកដថាវាចាប់បាន Element)
+  const phoneValue = $("#phone")?.value.trim();
+  const addressValue = $("#address")?.value.trim();
+  const noteValue = $("#note")?.value.trim() || "";
 
   // ២. ត្រួតពិនិត្យទិន្នន័យ
   if (!phoneValue || !addressValue) {
@@ -596,7 +597,7 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
     return;
   }
 
-  // ៣. បង្ហាញស្ថានភាពកំពុងផ្ញើ (Loading)
+  // ៣. បង្ហាញ Loading State
   payBtn.disabled = true;
   const originalText = payBtn.textContent;
   payBtn.textContent = "កំពុងផ្ញើទិន្នន័យ...";
@@ -611,6 +612,7 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
     address: addressValue,
     note: noteValue,
     items: Object.entries(cart).map(([id, qty]) => {
+      // ⚠️ ត្រូវប្រាកដថាប្រើ PRODUCTSALL ព្រោះក្នុង product.js អ្នកដាក់ឈ្មោះបែបនេះ
       const p = PRODUCTSALL.find(x => x.id === id);
       return p ? { id, name: p.name, price: p.price, qty } : null;
     }).filter(Boolean),
@@ -630,13 +632,13 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 
     if (result.success) {
       showToast("ការកម្ម៉ង់បានជោគជ័យ និងផ្ញើទៅកាន់ Bot! ✅");
-      
+
       // សម្អាត Cart
       cart = {};
       saveCart();
       promo.codeApplied = false;
       savePromo();
-      
+
       // Update UI
       renderCartBadge();
       renderCart();
@@ -651,9 +653,11 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
     showToast("ការតភ្ជាប់ទៅកាន់ Bot មានបញ្ហា! ❌");
   } finally {
     // ៦. ដាក់ឱ្យប៊ូតុងដំណើរការវិញ
-    payBtn.disabled = false;
-    payBtn.textContent = originalText;
-    payBtn.classList.remove("opacity-50", "cursor-not-allowed");
+    if (payBtn) {
+      payBtn.disabled = false;
+      payBtn.textContent = originalText;
+      payBtn.classList.remove("opacity-50", "cursor-not-allowed");
+    }
   }
 });
 
