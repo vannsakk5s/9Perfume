@@ -583,7 +583,7 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 
   // 3. Send to Backend
   try {
-    const response = await fetch('https://consult-solutions-cage-beauty.trycloudflare.com/api/place-order', {
+    const response = await fetch('https://kevin-compete-antique-agrees.trycloudflare.com/api/place-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData)
