@@ -617,16 +617,14 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 });
 
 // Map
-
 let map, marker;
-let currentCoords = null; // សម្រាប់បញ្ជូនទៅ Admin
+let currentCoords = null; // សម្រាប់រក្សាទុក Lat/Lng
 
 function openMapModal() {
   const container = document.getElementById('map-container');
-  container.classList.remove('hidden');
+  container.classList.toggle('hidden');
 
   if (!map) {
-    // ចំណុចកណ្តាលភ្នំពេញ
     map = L.map('map').setView([11.5564, 104.9282], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     marker = L.marker([11.5564, 104.9282], { draggable: true }).addTo(map);
@@ -639,25 +637,45 @@ function openMapModal() {
   }
 }
 
+// មុខងារស្វែងរកទីតាំង (Search)
+async function searchLocation() {
+  const query = document.getElementById('search-input').value;
+  if (!query) return;
+
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+    const data = await res.json();
+    
+    if (data.length > 0) {
+      const { lat, lon, display_name } = data[0];
+      const newPos = [parseFloat(lat), parseFloat(lon)];
+      
+      map.setView(newPos, 16);
+      marker.setLatLng(newPos);
+      currentCoords = { lat: parseFloat(lat), lng: parseFloat(lon) };
+      document.getElementById('address').value = display_name;
+    } else {
+      alert("រកមិនឃើញទីតាំងនេះទេ!");
+    }
+  } catch (error) {
+    console.error("Search error:", error);
+  }
+}
+
+// មុខងារចាប់យកទីតាំងបច្ចុប្បន្ន (Current Location)
 function getCurrentLocation() {
-  if (!navigator.geolocation) return alert("Browser មិនគាំទ្រ Geolocation ទេ");
-  
-  const btn = document.getElementById("get-loc-btn");
-  btn.textContent = "កំពុងស្វែងរក...";
+  if (!navigator.geolocation) return alert("Browser របស់អ្នកមិនគាំទ្រការចាប់ទីតាំងទេ");
 
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const { latitude, longitude } = pos.coords;
+    const newPos = [latitude, longitude];
+    
+    map.setView(newPos, 16);
+    marker.setLatLng(newPos);
     currentCoords = { lat: latitude, lng: longitude };
-    
-    openMapModal();
-    map.setView([latitude, longitude], 16);
-    marker.setLatLng([latitude, longitude]);
     await updateAddressFromCoords(latitude, longitude);
-    
-    btn.textContent = "📍 ប្រើទីតាំងបច្ចុប្បន្នរបស់ខ្ញុំ";
-  }, () => {
-    btn.textContent = "📍 ប្រើទីតាំងបច្ចុប្បន្នរបស់ខ្ញុំ";
-    alert("មិនអាចចាប់ទីតាំងបានទេ");
+  }, (err) => {
+    alert("មិនអាចចាប់យកទីតាំងបានទេ៖ " + err.message);
   });
 }
 
@@ -665,8 +683,11 @@ async function updateAddressFromCoords(lat, lng) {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
     const data = await res.json();
-    if (data.display_name) document.getElementById('address').value = data.display_name;
-  } catch (e) { console.error(e); }
+    if (data.display_name) {
+      document.getElementById('address').value = data.display_name;
+      currentCoords = { lat, lng };
+    }
+  } catch (error) {
+    console.log("រកមិនឃើញអាសយដ្ឋាន:", error);
+  }
 }
-
-// ក្នុងផ្នែក submitForm កុំភ្លេចបន្ថែម location: currentCoords ទៅក្នុង orderData
