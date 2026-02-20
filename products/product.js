@@ -149,15 +149,33 @@ function total() {
   const sub = subtotal();
   return Math.max(0, sub - discountAmount(sub));
 }
+
 function updateSingleProductBadge(id) {
-  renderProducts(); // ប្រសិនបើអ្នកចង់ឱ្យងាយស្រួល គ្រាន់តែទុកវាដដែល ប៉ុន្តែបន្ថែម type="button" ខាងលើសិន
+  const qty = cart[id] || 0;
+  const container = document.getElementById(`badge-container-${id}`);
+  const text = document.getElementById(`badge-text-${id}`);
+
+  if (container && text) {
+    if (qty > 0) {
+      text.textContent = qty;
+      container.classList.remove('hidden');
+      container.classList.add('grid');
+    } else {
+      container.classList.add('hidden');
+      container.classList.remove('grid');
+    }
+  }
 }
 
 function addToCart(id) {
   cart[id] = (cart[id] || 0) + 1;
   saveCart();
-  renderCart();
-  renderCartBadge();updateSingleProductBadge(id);
+  renderCart(); // Update ទិន្នន័យក្នុង Cart Drawer
+  renderCartBadge(); // Update ចំនួនសរុបក្នុង Header
+  
+  // ✅ Update តែ Badge របស់ផលិតផលមួយនេះ មិនបាច់ refresh ផលិតផលទាំងអស់
+  updateSingleProductBadge(id); 
+  
   showToast("Added to cart ✅");
 }
 
@@ -167,9 +185,73 @@ function setQty(id, qty) {
   saveCart();
   renderCart();
   renderCartBadge();
+  updateSingleProductBadge(id); // ✅ បន្ថែមជួរនេះ
 }
 
 // ---------- Products render ----------
+// function productCard(p) {
+//   const quantity = cart[p.id] || 0;
+//   const chips = p.notes.map(n => `
+//     <span class="rounded-full border bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600
+//                  dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">
+//       ${escapeHtml(n)}
+//     </span>
+//   `).join("");
+
+//   return `
+//     <article onclick="showDetail('${p.id}')" class="rounded-3xl min-w-[230px] border bg-white p-1 shadow-sm flex flex-col
+//                     dark:bg-slate-900 dark:border-slate-800 cursor-pointer hover:shadow-md transition-all">
+
+//       <div class="overflow-hidden rounded-t-[20px] rounded-b-[5px]">
+//         <img src="${escapeHtml(p.image)}"
+//              alt="${escapeHtml(p.name)}"
+//              class="h-48 w-full object-cover" />
+//       </div>
+
+//       <div class="flex mt-2 pl-2 pr-2 items-start justify-between gap-1">
+//         <div class="w-full">
+//           <div class="flex items-center justify-between">
+//             <h4 class="text-base font-semibold">
+//               ${p.name.length > 12 ? escapeHtml(p.name.slice(0, 12)) + '...' : escapeHtml(p.name)}
+//             </h4>
+//             <p class="text-xs text-slate-500 dark:text-slate-400">
+//               ${escapeHtml(p.brand)}
+//             </p>
+//           </div>
+//           <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+//             ${escapeHtml(p.vibe)} • ${escapeHtml(p.size)}
+//           </p>
+//         </div>
+//       </div>
+
+//       <div class="mt-2 pl-2 pr-2 flex flex-wrap gap-2">
+//         ${chips}
+//       </div>
+
+//       <div class="mt-2 mb-2 pl-2 pr-2 flex items-center justify-between">
+//         <p class="text-lg font-semibold">
+//           ${money(p.price)}
+//         </p>
+//         <div class="relative">
+//           <button type="button" onclick="event.stopPropagation(); addToCart('${p.id}')"
+//                   class="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white 
+//                          hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+//             Add
+//           </button>
+        
+          
+//           ${quantity > 0 ? `
+//             <div class="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border
+//                    dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700">
+//               <span class="text-slate-900 dark:text-white">${quantity}</span>
+//             </div>
+//           ` : ''} 
+//         </div>
+//       </div>
+//     </article>
+//   `;
+// }
+
 function productCard(p) {
   const quantity = cart[p.id] || 0;
   const chips = p.notes.map(n => `
@@ -220,13 +302,10 @@ function productCard(p) {
             Add
           </button>
         
-          
-          ${quantity > 0 ? `
-            <div class="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border
+          <div id="badge-container-${p.id}" class="absolute -right-2 -top-2 ${quantity > 0 ? 'grid' : 'hidden'} h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border
                    dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700">
-              <span class="text-slate-900 dark:text-white">${quantity}</span>
-            </div>
-          ` : ''} 
+            <span id="badge-text-${p.id}" class="text-slate-900 dark:text-white">${quantity}</span>
+          </div>
         </div>
       </div>
     </article>
