@@ -56,24 +56,24 @@ function updateActiveNav() {
 // window
 
 const normalize = (p) => {
-    p = p.split("?")[0].split("#")[0];
-    if (p.endsWith("/")) p += "index.html";           // folder -> index.html
-    p = p.replace(/\/{2,}/g, "/");                    // clean //
-    return p.toLowerCase();
-  };
+  p = p.split("?")[0].split("#")[0];
+  if (p.endsWith("/")) p += "index.html";           // folder -> index.html
+  p = p.replace(/\/{2,}/g, "/");                    // clean //
+  return p.toLowerCase();
+};
 
-  const current = normalize(location.pathname);
+const current = normalize(location.pathname);
 
-  document.querySelectorAll("a.nav-link").forEach((a) => {
-    const href = a.getAttribute("href");
-    if (!href || href.startsWith("http")) return;
+document.querySelectorAll("a.nav-link").forEach((a) => {
+  const href = a.getAttribute("href");
+  if (!href || href.startsWith("http")) return;
 
-    // Convert relative href to an absolute pathname
-    const resolved = new URL(href, location.href);
-    if (normalize(resolved.pathname) === current) {
-      a.classList.add("active");
-    }
-  });
+  // Convert relative href to an absolute pathname
+  const resolved = new URL(href, location.href);
+  if (normalize(resolved.pathname) === current) {
+    a.classList.add("active");
+  }
+});
 
 // ហៅ function ឱ្យដំណើរការ
 document.addEventListener('DOMContentLoaded', updateActiveNav);
@@ -567,18 +567,23 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 
   // 2. Get Telegram Data (if running inside Telegram)
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-  
+
   const orderData = {
     telegramId: tgUser?.id?.toString() || "WEB_USER",
     firstName: tgUser?.first_name || "Guest",
     phone: phoneEl.value.trim(),
     address: addressEl.value.trim(),
-    note: noteEl ? noteEl.value.trim() : "",
+    note: $("#note").value.trim(),
+    // កែសម្រួលកន្លែងនេះ៖ ប្រើ filter ដើម្បីលុបចោល item ណាដែល undefined
     items: Object.entries(cart).map(([id, qty]) => {
       const p = PRODUCTS.find(x => x.id === id);
-      return { id, name: p?.name, price: p?.price, qty };
-    }),
-    total: total().toFixed(2)
+      if (p) {
+        return { id, name: p.name, price: p.price, qty };
+      }
+      return null;
+    }).filter(item => item !== null), // លុប item ដែលរកមិនឃើញចេញ
+    total: total().toFixed(2),
+    location: currentCoords
   };
 
   // 3. Send to Backend
@@ -629,7 +634,7 @@ function openMapModal() {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     marker = L.marker([11.5564, 104.9282], { draggable: true }).addTo(map);
 
-    marker.on('dragend', function() {
+    marker.on('dragend', function () {
       const latlng = marker.getLatLng();
       currentCoords = { lat: latlng.lat, lng: latlng.lng };
       updateAddressFromCoords(latlng.lat, latlng.lng);
@@ -645,11 +650,11 @@ async function searchLocation() {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
     const data = await res.json();
-    
+
     if (data.length > 0) {
       const { lat, lon, display_name } = data[0];
       const newPos = [parseFloat(lat), parseFloat(lon)];
-      
+
       map.setView(newPos, 16);
       marker.setLatLng(newPos);
       currentCoords = { lat: parseFloat(lat), lng: parseFloat(lon) };
@@ -669,7 +674,7 @@ function getCurrentLocation() {
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const { latitude, longitude } = pos.coords;
     const newPos = [latitude, longitude];
-    
+
     map.setView(newPos, 16);
     marker.setLatLng(newPos);
     currentCoords = { lat: latitude, lng: longitude };
