@@ -576,3 +576,75 @@ document.addEventListener("DOMContentLoaded", () => {
   renderCartBadge();
   renderCart();
 });
+
+$("#checkoutForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const payBtn = e.target.querySelector('button[type="submit"]');
+  if (payBtn.disabled) return; // Stop here if already processing
+
+  // 1. Safe Selection: Check if elements exist before getting .value
+  const phoneEl = $("#phone");
+  const addressEl = $("#address");
+  const noteEl = $("#note");
+
+  if (!phoneEl || !addressEl) {
+    showToast("Missing form fields! ❌");
+    return;
+  }
+
+  payBtn.disabled = true;
+  const originalText = payBtn.textContent;
+  payBtn.textContent = "Processing..."; // Give user feedback
+  payBtn.style.opacity = "0.5";
+
+  // 2. Get Telegram Data (if running inside Telegram)
+  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  
+  const orderData = {
+    telegramId: tgUser?.id?.toString() || "WEB_USER",
+    firstName: tgUser?.first_name || "Guest",
+    phone: phoneEl.value.trim(),
+    address: addressEl.value.trim(),
+    note: noteEl ? noteEl.value.trim() : "",
+    items: Object.entries(cart).map(([id, qty]) => {
+      const p = PRODUCTS.find(x => x.id === id);
+      return { id, name: p?.name, price: p?.price, qty };
+    }),
+    total: total().toFixed(2)
+  };
+
+  // 3. Send to Backend
+  try {
+    const response = await fetch('https://kevin-compete-antique-agrees.trycloudflare.com/api/place-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      showToast("Order Success! ✅");
+      cart = {};
+      saveCart();
+      renderCartBadge();
+      renderCart();
+      closeCheckout();
+      e.target.reset();
+    } else {
+      showToast("Error: " + result.error);
+      // Re-enable if server rejected it
+      payBtn.disabled = false;
+      payBtn.textContent = originalText;
+      payBtn.style.opacity = "1";
+    }
+  } catch (err) {
+    console.error("Fetch Error:", err);
+    showToast("Server Connection Failed ❌");
+    // Re-enable so user can try again if it was just a network glitch
+    payBtn.disabled = false;
+    payBtn.textContent = originalText;
+    payBtn.style.opacity = "1";
+  }
+});

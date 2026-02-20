@@ -25,7 +25,7 @@
     <!-- Top Bar -->
     <header class="sticky top-0 z-30 border-b bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
         <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
-            <div class="flex mt-20 md:mt-0 items-center gap-3">
+            <div class="flex mt-20 md:mt-5 items-center gap-3">
                 <div class="h-10 w-10 rounded-2xl bg-slate-900 dark:bg-white"></div>
                 <div>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Mini App</p>
@@ -33,7 +33,7 @@
                 </div>
             </div>
 
-            <div class="hidden mt-20 md:mt-0 flex-1 items-center gap-2 md:flex md:justify-center">
+            <div class="hidden mt-20 md:mt-5 flex-1 items-center gap-2 md:flex md:justify-center">
                 <div class="relative w-full max-w-xl flex justify-beetween items-center">
                     <input id="searchInput" type="text" placeholder="Search perfumes (e.g., rose, oud, citrus)..."
                         class="w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
@@ -60,7 +60,7 @@
                 </select>
             </div>
 
-            <div class="flex mt-20 md:mt-0 items-center gap-2">
+            <div class="flex mt-20 md:mt-5 items-center gap-2">
                 <button id="themeToggle" class="rounded-2xl border bg-white px-4 py-3 text-sm font-medium hover:bg-slate-50
                  dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
                     🌙
@@ -225,7 +225,7 @@
         <div
             class="absolute right-0 top-0 h-[100dvh] w-full max-w-md bg-white shadow-xl dark:bg-slate-950 flex flex-col">
 
-            <div class="flex items-center mt-20 justify-between border-b px-5 py-4 dark:border-slate-800">
+            <div class="flex items-center mt-20 md:mt-5 justify-between border-b px-5 py-4 dark:border-slate-800">
                 <div>
                     <h3 class="text-sm font-semibold">Your cart</h3>
                     <p id="cartSub" class="text-xs text-slate-500 dark:text-slate-400">0 items</p>
@@ -296,18 +296,18 @@
             <form id="checkoutForm" class="px-6 py-5 space-y-4">
                 <div class="grid gap-3 sm:grid-cols-2">
                     <div>
-                        <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Full name</label>
-                        <input required id="name"
-                            class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
-                     bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
-                            placeholder="Your name" />
-                    </div>
-                    <div>
                         <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Phone</label>
                         <input required id="phone"
                             class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
                      bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
                             placeholder="+855 ..." />
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Note</label>
+                        <input id="note"
+                            class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
+                     bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+                            placeholder="Gift wrap, call before..." />
                     </div>
                 </div>
 
@@ -319,37 +319,21 @@
                         placeholder="Street, city, details" />
                 </div>
 
-                <div class="grid gap-3 sm:grid-cols-2">
-                    <div>
-                        <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Payment</label>
-                        <select id="payment" class="mt-1 w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none hover:bg-slate-50
-                     dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
-                            <option>Cash on delivery</option>
-                            <option>Card (demo)</option>
-                            <option>ABA / Bank transfer (demo)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Note</label>
-                        <input id="note"
-                            class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
-                     bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
-                            placeholder="Gift wrap, call before..." />
-                    </div>
-                </div>
-
                 <div class="rounded-2xl border bg-slate-50 p-4 text-sm dark:bg-slate-900 dark:border-slate-800">
                     <div class="flex justify-between text-slate-600 dark:text-slate-300">
                         <span>Order total</span><span id="checkoutTotal">$0.00</span>
                     </div>
-                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                        This is a demo checkout (no real payments). On submit we’ll “place order” and clear cart.
-                    </p>
+                    <div class="flex justify-between items-center gap-2">
+                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                            We Accept :
+                        </p>
+                        <img src="./images/khqr.png" alt="khqr" class="h-4 mt-1">
+                    </div>
                 </div>
 
-                <button class="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800
+                <button id="payBtn" type="submit" class="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800
                        dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
-                    Place order
+                    Pay
                 </button>
             </form>
         </div>
