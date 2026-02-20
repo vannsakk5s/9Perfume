@@ -578,28 +578,27 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+// --- បញ្ចូលគ្នា៖ Checkout Form Submission ---
 $("#checkoutForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const payBtn = e.target.querySelector('button[type="submit"]');
-  if (payBtn.disabled) return; // Stop here if already processing
+  if (payBtn.disabled) return;
 
-  // 1. Safe Selection: Check if elements exist before getting .value
   const phoneEl = $("#phone");
   const addressEl = $("#address");
-  const noteEl = $("#note");
 
-  if (!phoneEl || !addressEl) {
-    showToast("Missing form fields! ❌");
+  if (!phoneEl?.value.trim() || !addressEl?.value.trim()) {
+    showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
     return;
   }
 
+  // បង្ហាញ Loading State
   payBtn.disabled = true;
   const originalText = payBtn.textContent;
-  payBtn.textContent = "Processing..."; // Give user feedback
-  payBtn.style.opacity = "0.5";
+  payBtn.textContent = "កំពុងដំណើរការ...";
+  payBtn.classList.add("opacity-50", "cursor-not-allowed");
 
-  // 2. Get Telegram Data (if running inside Telegram)
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
 
   const orderData = {
@@ -607,20 +606,15 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
     firstName: tgUser?.first_name || "Guest",
     phone: phoneEl.value.trim(),
     address: addressEl.value.trim(),
-    note: $("#note").value.trim(),
-    // កែសម្រួលកន្លែងនេះ៖ ប្រើ filter ដើម្បីលុបចោល item ណាដែល undefined
+    note: $("#note")?.value.trim() || "",
     items: Object.entries(cart).map(([id, qty]) => {
       const p = PRODUCTS.find(x => x.id === id);
-      if (p) {
-        return { id, name: p.name, price: p.price, qty };
-      }
-      return null;
-    }).filter(item => item !== null), // លុប item ដែលរកមិនឃើញចេញ
+      return p ? { id, name: p.name, price: p.price, qty } : null;
+    }).filter(Boolean),
     total: total().toFixed(2),
-    location: currentCoords
+    location: currentCoords // បានមកពី Map
   };
 
-  // 3. Send to Backend
   try {
     const response = await fetch('https://kevin-compete-antique-agrees.trycloudflare.com/api/place-order', {
       method: 'POST',
@@ -631,27 +625,30 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
     const result = await response.json();
 
     if (result.success) {
-      showToast("Order Success! ✅");
+      showToast("ការកម្ម៉ង់បានជោគជ័យ! ✅");
+      // សម្អាតទិន្នន័យ
       cart = {};
       saveCart();
+      promo.codeApplied = false;
+      savePromo();
+      
+      // Update UI
       renderCartBadge();
       renderCart();
       closeCheckout();
+      closeCart();
       e.target.reset();
     } else {
-      showToast("Error: " + result.error);
-      // Re-enable if server rejected it
-      payBtn.disabled = false;
-      payBtn.textContent = originalText;
-      payBtn.style.opacity = "1";
+      throw new Error(result.error || "Server error");
     }
   } catch (err) {
     console.error("Fetch Error:", err);
-    showToast("Server Connection Failed ❌");
-    // Re-enable so user can try again if it was just a network glitch
+    showToast("ការតភ្ជាប់មានបញ្ហា ❌");
+  } finally {
+    // ដាក់ប៊ូតុងឱ្យដើរវិញ
     payBtn.disabled = false;
     payBtn.textContent = originalText;
-    payBtn.style.opacity = "1";
+    payBtn.classList.remove("opacity-50", "cursor-not-allowed");
   }
 });
 
