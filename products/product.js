@@ -1,10 +1,88 @@
 // =========================
-// Dark/Light Mode & App Logic
+// Dark/Light Mode (NEW)
 // =========================
 const THEME_KEY = "miniperfume_theme_v1";
-const STORAGE_KEY = "miniperfume_cart_v1";
-const PROMO_CODE = "WELCOME10";
-const PROMO_RATE = 0.10;
+
+function setTheme(mode) {
+  const isDark = mode === "dark";
+  document.documentElement.classList.toggle("dark", isDark);
+  localStorage.setItem(THEME_KEY, mode);
+
+  const btn = document.getElementById("themeToggle");
+  if (btn) btn.textContent = isDark ? "☀️" : "🌙";
+}
+
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+  if (saved === "dark" || saved === "light") setTheme(saved);
+  else setTheme(prefersDark ? "dark" : "light");
+}
+
+function updateActiveNav() {
+  const currentPath = window.location.pathname;
+  const navItems = document.querySelectorAll('.nav-item');
+
+  // លុប style active ចាស់ចេញទាំងអស់
+  navItems.forEach(item => {
+    item.classList.remove('text-slate-900', 'dark:text-white');
+    item.classList.add('text-slate-500', 'dark:text-slate-400');
+  });
+
+  // បន្ថែម style active ទៅកាន់ item ដែលត្រូវនឹង URL
+  if (currentPath.includes('product.html')) {
+    const productNav = document.getElementById('nav-product');
+    if (productNav) {
+      productNav.classList.replace('text-slate-500', 'text-slate-900');
+      productNav.classList.replace('dark:text-slate-400', 'dark:text-white');
+    }
+  } else if (currentPath.includes('about.html')) {
+    const receiptNav = document.getElementById('nav-receipt');
+    if (receiptNav) {
+      receiptNav.classList.replace('text-slate-500', 'text-slate-900');
+      receiptNav.classList.replace('dark:text-slate-400', 'dark:text-white');
+    }
+  } else {
+    // បើមិនមែនទំព័រខាងលើ គឺចាត់ទុកថាជាទំព័រ Home
+    const homeNav = document.getElementById('nav-home');
+    if (homeNav) {
+      homeNav.classList.replace('text-slate-500', 'text-slate-900');
+      homeNav.classList.replace('dark:text-slate-400', 'dark:text-white');
+    }
+  }
+}
+
+// window
+
+const normalize = (p) => {
+  p = p.split("?")[0].split("#")[0];
+  if (p.endsWith("/")) p += "index.html";           // folder -> index.html
+  p = p.replace(/\/{2,}/g, "/");                    // clean //
+  return p.toLowerCase();
+};
+
+const current = normalize(location.pathname);
+
+document.querySelectorAll("a.nav-link").forEach((a) => {
+  const href = a.getAttribute("href");
+  if (!href || href.startsWith("http")) return;
+
+  // Convert relative href to an absolute pathname
+  const resolved = new URL(href, location.href);
+  if (normalize(resolved.pathname) === current) {
+    a.classList.add("active");
+  }
+});
+
+// ហៅ function ឱ្យដំណើរការ
+document.addEventListener('DOMContentLoaded', updateActiveNav);
+
+// =========================
+// Mini Perfume Shop App
+// (from previous script.js)
+// search : productGrid
+// =========================
 
 // ---------- Data product ----------
 const PRODUCTS = [
@@ -19,11 +97,14 @@ const PRODUCTS = [
 ];
 
 // ---------- State ----------
-let cart = loadCart();
-let promo = loadPromo();
+const STORAGE_KEY = "miniperfume_cart_v1";
+const PROMO_CODE = "WELCOME10";
+const PROMO_RATE = 0.10;
+
+let cart = loadCart();         // { [productId]: qty }
+let promo = loadPromo();       // { codeApplied: boolean }
 let search = "";
 let sort = "featured";
-let currentCoords = null;
 
 // ---------- Helpers ----------
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -43,13 +124,31 @@ function showToast(msg, ms = 2200) {
 }
 
 function saveCart() { localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); }
-function loadCart() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
+function loadCart() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
 function savePromo() { localStorage.setItem(STORAGE_KEY + "_promo", JSON.stringify(promo)); }
-function loadPromo() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY + "_promo")) || { codeApplied: false }; } catch { return { codeApplied: false }; } }
+function loadPromo() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY + "_promo")) || { codeApplied: false }; }
+  catch { return { codeApplied: false }; }
+}
+
 function cartCount() { return Object.values(cart).reduce((a, b) => a + b, 0); }
-function subtotal() { return Object.entries(cart).reduce((sum, [id, qty]) => { const p = PRODUCTS.find(x => x.id === id); return sum + (p ? p.price * qty : 0); }, 0); }
+
+function subtotal() {
+  return Object.entries(cart).reduce((sum, [id, qty]) => {
+    const p = PRODUCTS.find(x => x.id === id);
+    return sum + (p ? p.price * qty : 0);
+  }, 0);
+}
+
 function discountAmount(sub) { return promo.codeApplied ? sub * PROMO_RATE : 0; }
-function total() { const sub = subtotal(); return Math.max(0, sub - discountAmount(sub)); }
+function total() {
+  const sub = subtotal();
+  return Math.max(0, sub - discountAmount(sub));
+}
 
 function addToCart(id) {
   cart[id] = (cart[id] || 0) + 1;
@@ -66,195 +165,565 @@ function setQty(id, qty) {
   saveCart();
   renderCart();
   renderCartBadge();
-  renderProducts();
 }
 
-function escapeHtml(str) { return String(str).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m])); }
-
-// ---------- UI Functions ----------
-function setTheme(mode) {
-  const isDark = mode === "dark";
-  document.documentElement.classList.toggle("dark", isDark);
-  localStorage.setItem(THEME_KEY, mode);
-  const btn = $("#themeToggle");
-  if (btn) btn.textContent = isDark ? "☀️" : "🌙";
-}
-
-function initTheme() {
-  const saved = localStorage.getItem(THEME_KEY);
-  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  setTheme(saved === "dark" || saved === "light" ? saved : (prefersDark ? "dark" : "light"));
-}
-
+// ---------- Products render ----------
 function productCard(p) {
   const quantity = cart[p.id] || 0;
-  const chips = p.notes.map(n => `<span class="rounded-full border bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">${escapeHtml(n)}</span>`).join("");
+  const chips = p.notes.map(n => `
+    <span class="rounded-full border bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600
+                 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">
+      ${escapeHtml(n)}
+    </span>
+  `).join("");
+
   return `
-    <article onclick="showDetail('${p.id}')" class="rounded-3xl min-w-[230px] border bg-white p-1 shadow-sm flex flex-col dark:bg-slate-900 dark:border-slate-800 cursor-pointer hover:shadow-md transition-all">
-      <div class="overflow-hidden rounded-t-[20px] rounded-b-[5px]"><img src="${escapeHtml(p.image)}" class="h-48 w-full object-cover" /></div>
+    <article onclick="showDetail('${p.id}')" class="rounded-3xl min-w-[230px] border bg-white p-1 shadow-sm flex flex-col
+                    dark:bg-slate-900 dark:border-slate-800 cursor-pointer hover:shadow-md transition-all">
+
+      <div class="overflow-hidden rounded-t-[20px] rounded-b-[5px]">
+        <img src="${escapeHtml(p.image)}"
+             alt="${escapeHtml(p.name)}"
+             class="h-48 w-full object-cover" />
+      </div>
+
       <div class="flex mt-2 pl-2 pr-2 items-start justify-between gap-1">
         <div class="w-full">
-          <div class="flex items-center justify-between"><h4 class="text-base font-semibold">${p.name.length > 12 ? escapeHtml(p.name.slice(0, 12)) + '...' : escapeHtml(p.name)}</h4><p class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(p.brand)}</p></div>
-          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">${escapeHtml(p.vibe)} • ${escapeHtml(p.size)}</p>
+          <div class="flex items-center justify-between">
+            <h4 class="text-base font-semibold">
+              ${p.name.length > 12 ? escapeHtml(p.name.slice(0, 12)) + '...' : escapeHtml(p.name)}
+            </h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              ${escapeHtml(p.brand)}
+            </p>
+          </div>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            ${escapeHtml(p.vibe)} • ${escapeHtml(p.size)}
+          </p>
         </div>
       </div>
-      <div class="mt-2 pl-2 pr-2 flex flex-wrap gap-2">${chips}</div>
+
+      <div class="mt-2 pl-2 pr-2 flex flex-wrap gap-2">
+        ${chips}
+      </div>
+
       <div class="mt-2 mb-2 pl-2 pr-2 flex items-center justify-between">
-        <p class="text-lg font-semibold">${money(p.price)}</p>
+        <p class="text-lg font-semibold">
+          ${money(p.price)}
+        </p>
         <div class="relative">
-          <button onclick="event.stopPropagation(); addToCart('${p.id}')" class="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">Add</button>
-          ${quantity > 0 ? `<div class="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border dark:bg-slate-900 dark:text-white dark:border-slate-700">${quantity}</div>` : ''}
+          <button onclick="event.stopPropagation(); addToCart('${p.id}')"
+                  class="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white 
+                         hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+            Add
+          </button>
+        
+          
+          ${quantity > 0 ? `
+            <div class="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border
+                   dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700">
+              <span class="text-slate-900 dark:text-white">${quantity}</span>
+            </div>
+          ` : ''} 
         </div>
       </div>
-    </article>`;
+    </article>
+  `;
 }
 
+// ----------- Show Product Detail ----------
 function showDetail(id) {
-  const p = PRODUCTS.find(x => x.id === id);
-  if (!p) return;
-  $("#detail-img").src = p.image;
-  $("#detail-title").innerText = p.name;
-  $("#detail-brand").innerText = p.brand;
-  $("#detail-notes").innerHTML = p.notes.map(n => `<span class="rounded-full border bg-slate-50 px-2.5 py-1 text-sm text-slate-600 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">${escapeHtml(n)}</span>`).join(" ");
-  $("#detail-category").innerText = `${p.vibe} • ${p.size}`;
-  $("#detail-price").innerText = money(p.price);
-  $("#detail-desc").innerText = p.des || `Experience the essence of ${p.name} ${p.brand}.`;
-  $("#detail-modal").classList.replace("hidden", "flex");
+  const product = PRODUCTS.find(p => p.id === id);
+  if (!product) return;
+
+  // Fill the Modal Data
+  $("#detail-img").src = product.image;
+  $("#detail-title").innerText = product.name;
+  $("#detail-brand").innerText = product.brand;
+  $("#detail-notes").innerHTML = product.notes.map(n => `<span class="rounded-full border bg-slate-50 px-2.5 py-1 text-sm text-slate-600
+                                         dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">${escapeHtml(n)}</span>`).join(" ");
+  $("#detail-category").innerText = `${product.vibe} • ${product.size}`;
+  $("#detail-price").innerText = money(product.price);
+
+  // Generate description from notes if a formal description doesn't exist
+  $("#detail-desc").innerText = product.des || `Experience the essence of ${product.name} ${product.brand} A ${product.vibe.toLowerCase()} fragrance featuring notes of ${product.notes.join(', ')}. Perfect for those who appreciate ${product.brand} craftsmanship.`;
+
+  // Show Modal
+  const modal = $("#detail-modal");
+  modal.classList.remove("hidden");
+  modal.classList.add("flex"); // Ensure it uses flex to center
   document.body.classList.add("overflow-hidden");
 }
 
-function closeDetail() { $("#detail-modal").classList.replace("flex", "hidden"); document.body.classList.remove("overflow-hidden"); }
+// Close Detail
+function closeDetail() {
+  $("#detail-modal").classList.add("hidden");
+  $("#detail-modal").classList.remove("flex");
+  document.body.classList.remove("overflow-hidden");
+}
 
-function renderProducts() {
+function getFilteredSortedProducts() {
   let items = [...PRODUCTS];
+
   if (search.trim()) {
     const q = search.trim().toLowerCase();
-    items = items.filter(p => `${p.name} ${p.brand} ${p.size} ${p.vibe} ${p.notes.join(" ")}`.toLowerCase().includes(q));
+    items = items.filter(p => {
+      const hay = `${p.name} ${p.brand} ${p.size} ${p.vibe} ${p.notes.join(" ")}`.toLowerCase();
+      return hay.includes(q);
+    });
   }
+
   if (sort === "price_asc") items.sort((a, b) => a.price - b.price);
   else if (sort === "price_desc") items.sort((a, b) => b.price - a.price);
   else if (sort === "name_asc") items.sort((a, b) => a.name.localeCompare(b.name));
   else items.sort((a, b) => a.featured - b.featured);
 
-  const grouped = items.reduce((acc, p) => { if (!acc[p.brand]) acc[p.brand] = []; acc[p.brand].push(p); return acc; }, {});
-  let html = "";
-  for (const brand in grouped) {
-    html += `<section class="mb-10"><div class="flex items-end justify-between mb-4"><div><h3 class="text-base font-semibold">Brand ${escapeHtml(brand)}</h3><p class="text-sm text-slate-500">Showing ${grouped[brand].length} items</p></div></div><div class="flex gap-4 pb-4 overflow-x-auto sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">${grouped[brand].map(p => productCard(p)).join("")}</div></section>`;
-  }
-  $("#productGrid").innerHTML = html || `<div class="text-center py-20 text-slate-500">No products found.</div>`;
+  return items;
 }
 
-// ---------- Cart & Checkout Logic ----------
-const openCart = () => { $("#cartDrawer").classList.remove("hidden"); renderCart(); };
-const closeCart = () => { $("#cartDrawer").classList.add("hidden"); };
-const openCheckout = () => { if (cartCount() === 0) return showToast("Cart is empty 🙂"); $("#checkoutBackdrop").classList.replace("hidden", "flex"); $("#checkoutTotal").textContent = money(total()); };
-const closeCheckout = () => { $("#checkoutBackdrop").classList.replace("flex", "hidden"); };
+function renderProducts() {
+  const items = getFilteredSortedProducts();
+  const container = $("#productGrid");
+
+  // ១. បំបែកផលិតផលជាក្រុមៗតាម Brand
+  const grouped = items.reduce((acc, p) => {
+    if (!acc[p.brand]) acc[p.brand] = [];
+    acc[p.brand].push(p);
+    return acc;
+  }, {});
+
+  // ២. បង្កើត HTML សម្រាប់ក្រុម Brand នីមួយៗ
+  let finalHtml = "";
+
+  for (const brand in grouped) {
+    finalHtml += `
+      <section class="mb-10">
+        <div class="flex items-end justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-base font-semibold">Brand ${escapeHtml(brand)}</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Showing ${grouped[brand].length} items</p>
+          </div>
+          <button class="rounded-2xl border bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50 
+                         dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
+            All Products
+          </button>
+        </div>
+
+        <div class="flex gap-4 pb-4 overflow-x-auto sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          ${grouped[brand].map(p => productCard(p)).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  // ៣. បង្ហាញទៅក្នុង Container
+  container.innerHTML = finalHtml || `<div class="text-center py-20 text-slate-500">No products found.</div>`;
+}
+
+// receipt modal (for demo, just shows cart)
+function openReceiptModal() {
+  // For now, let's show the cart if it has items, or a toast if empty
+  if (cartCount() > 0) {
+    openCart();
+  } else {
+    openCart();
+  }
+}
+
+// ---------- Cart drawer ----------
+const cartDrawer = document.getElementById("cartDrawer");
+const openCart = () => {
+  const drawer = document.getElementById("cartDrawer");
+  drawer.classList.remove("hidden");
+  document.body.classList.add("no-scroll"); // Lock background
+  renderCart();
+};
+
+const closeCart = () => {
+  const drawer = document.getElementById("cartDrawer");
+  drawer.classList.add("hidden");
+  document.body.classList.remove("no-scroll"); // Unlock background
+}
+
+// function showDetail(id) {
+//   // ... existing logic to find product ...
+//   $("#detail-modal").classList.remove("hidden");
+//   $("#detail-modal").classList.add("flex");
+//   document.body.classList.add("no-scroll"); // Lock background
+// }
+
+// function closeDetail() {
+//   $("#detail-modal").classList.add("hidden");
+//   $("#detail-modal").classList.remove("flex");
+//   document.body.classList.remove("no-scroll"); // Unlock background
+// }
+
+$("#openCartBtn").addEventListener("click", () => { openCart(); renderCart(); });
+$("#closeCartBtn").addEventListener("click", closeCart);
+$("#cartOverlay").addEventListener("click", closeCart);
+
+// Escape to close drawers/modals
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { closeCart(); closeCheckout(); }
+});
 
 function renderCartBadge() {
   $("#cartCount").textContent = cartCount();
-  $("#cartSub").textContent = `${cartCount()} items`;
+  $("#cartSub").textContent = `${cartCount()} item${cartCount() === 1 ? "" : "s"}`;
   $("#checkoutBtn").disabled = cartCount() === 0;
+}
+
+function cartRow(p, qty) {
+  return `
+        <li class="rounded-2xl border bg-white p-4 dark:bg-slate-900 dark:border-slate-800">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(p.brand)}</p>
+              <p class="mt-1 text-sm font-semibold truncate">${escapeHtml(p.name)} <span class="text-slate-400 font-medium">• ${escapeHtml(p.size)}</span></p>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">${escapeHtml(p.vibe)}</p>
+            </div>
+            <p class="text-sm font-semibold whitespace-nowrap">${money(p.price * qty)}</p>
+          </div>
+
+          <div class="mt-3 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <button data-dec="${p.id}" class="rounded-xl border bg-white px-3 py-2 text-sm hover:bg-slate-50
+                                         dark:bg-slate-950 dark:border-slate-700 dark:hover:bg-slate-900">−</button>
+              <span class="min-w-[2ch] text-center text-sm font-medium">${qty}</span>
+              <button data-inc="${p.id}" class="rounded-xl border bg-white px-3 py-2 text-sm hover:bg-slate-50
+                                         dark:bg-slate-950 dark:border-slate-700 dark:hover:bg-slate-900">+</button>
+            </div>
+            <button data-del="${p.id}" class="rounded-xl border bg-white px-3 py-2 text-xs font-medium hover:bg-slate-50
+                                        dark:bg-slate-950 dark:border-slate-700 dark:hover:bg-slate-900">
+              Remove
+            </button>
+          </div>
+        </li>
+      `;
 }
 
 function renderCart() {
   const entries = Object.entries(cart);
-  $("#emptyCart").classList.toggle("hidden", entries.length > 0);
+  const hasItems = entries.length > 0;
+  $("#emptyCart").classList.toggle("hidden", hasItems);
+
   $("#cartItems").innerHTML = entries.map(([id, qty]) => {
     const p = PRODUCTS.find(x => x.id === id);
-    if (!p) return "";
-    return `<li class="rounded-2xl border bg-white p-4 dark:bg-slate-900 dark:border-slate-800"><div class="flex justify-between"><div><p class="text-xs text-slate-500">${p.brand}</p><p class="text-sm font-semibold">${p.name}</p></div><p class="text-sm font-semibold">${money(p.price * qty)}</p></div><div class="mt-3 flex justify-between"><div class="flex gap-2"><button onclick="setQty('${p.id}', ${qty - 1})" class="rounded-xl border px-3 py-1">-</button><span>${qty}</span><button onclick="setQty('${p.id}', ${qty + 1})" class="rounded-xl border px-3 py-1">+</button></div><button onclick="setQty('${p.id}', 0)" class="text-xs text-red-500">Remove</button></div></li>`;
+    return p ? cartRow(p, qty) : "";
   }).join("");
+
   const sub = subtotal();
+  const disc = discountAmount(sub);
   $("#subtotalText").textContent = money(sub);
-  $("#discountText").textContent = `-${money(discountAmount(sub))}`;
-  $("#totalText").textContent = money(total());
+  $("#discountText").textContent = `-${money(disc)}`;
+  $("#totalText").textContent = money(sub - disc);
+  $("#checkoutTotal").textContent = money(sub - disc);
+
+  $("#promoHint").textContent = promo.codeApplied
+    ? `Promo applied: ${PROMO_CODE} (10% off)`
+    : `Try ${PROMO_CODE} for 10% off.`;
+
+  $$("#cartItems [data-inc]").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.inc;
+    setQty(id, (cart[id] || 0) + 1);
+  }));
+  $$("#cartItems [data-dec]").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.dec;
+    setQty(id, (cart[id] || 0) - 1);
+  }));
+  $$("#cartItems [data-del]").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.del;
+    delete cart[id];
+    saveCart();
+    renderCart();
+    renderCartBadge();
+    showToast("Removed 🗑️");
+  }));
 }
 
-// =========================
-// Form Submission (Fixed)
-// =========================
-async function handleCheckout(e) {
+$("#clearCartBtn").addEventListener("click", () => {
+  cart = {};
+  saveCart();
+  promo.codeApplied = false;
+  savePromo();
+  renderCart();
+  renderCartBadge();
+  showToast("Cart cleared");
+});
+
+$("#applyPromo").addEventListener("click", () => {
+  const code = ($("#promoInput").value || "").trim().toUpperCase();
+  if (code === PROMO_CODE) {
+    promo.codeApplied = true;
+    savePromo();
+    renderCart();
+    showToast("Promo applied 🎉");
+  } else {
+    promo.codeApplied = false;
+    savePromo();
+    renderCart();
+    showToast("Invalid code");
+  }
+});
+
+// ---------- Checkout modal ----------
+const checkoutBackdrop = $("#checkoutBackdrop");
+const openCheckout = () => {
+  if (cartCount() === 0) return showToast("Cart is empty 🙂");
+  checkoutBackdrop.classList.remove("hidden");
+  checkoutBackdrop.classList.add("flex");
+  $("#checkoutTotal").textContent = money(total());
+};
+const closeCheckout = () => {
+  checkoutBackdrop.classList.add("hidden");
+  checkoutBackdrop.classList.remove("flex");
+};
+
+$("#checkoutBtn").addEventListener("click", openCheckout);
+$("#closeCheckout").addEventListener("click", closeCheckout);
+checkoutBackdrop.addEventListener("click", (e) => { if (e.target === checkoutBackdrop) closeCheckout(); });
+
+$("#checkoutForm").addEventListener("submit", (e) => {
   e.preventDefault();
-  const payBtn = $("#payBtn");
-  if (payBtn.disabled) return;
 
-  const phone = $("#phone").value.trim();
-  const address = $("#address").value.trim();
-  if (!phone || !address) return showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
-
-  payBtn.disabled = true;
-  payBtn.textContent = "កំពុងផ្ញើ...";
-
-  // យកទិន្នន័យពី Telegram (នឹងទៅជា WEB_USER បើតេស្តលើ Chrome)
-  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-  const orderData = {
-    telegramId: tgUser?.id?.toString() || "WEB_USER",
-    firstName: tgUser?.first_name || "Guest",
-    phone,
-    address,
+  const order = {
+    name: $("#name").value.trim(),
+    phone: $("#phone").value.trim(),
+    address: $("#address").value.trim(),
+    payment: $("#payment").value,
     note: $("#note").value.trim(),
     items: Object.entries(cart).map(([id, qty]) => {
       const p = PRODUCTS.find(x => x.id === id);
-      return p ? { name: p.name, price: p.price, qty } : null;
+      return { id, name: p?.name, price: p?.price, qty };
+    }),
+    total: total(),
+    promoApplied: promo.codeApplied
+  };
+
+  console.log("ORDER (demo):", order);
+
+  closeCheckout();
+  closeCart();
+  cart = {};
+  saveCart();
+  promo.codeApplied = false;
+  savePromo();
+  renderCartBadge();
+  showToast("Order placed ✅ (demo)");
+  e.target.reset();
+});
+
+// ---------- Search / sort / clear ----------
+function bindSearchSort() {
+  const desktopSearch = $("#searchInput");
+  const mobileSearch = $("#searchInputMobile");
+  const desktopSort = $("#sortSelect");
+  const mobileSort = $("#sortSelectMobile");
+
+  const setSearch = (val) => { search = val; renderProducts(); };
+  const setSort = (val) => { sort = val; renderProducts(); };
+
+  desktopSearch.addEventListener("input", () => { setSearch(desktopSearch.value); mobileSearch.value = desktopSearch.value; });
+  mobileSearch.addEventListener("input", () => { setSearch(mobileSearch.value); desktopSearch.value = mobileSearch.value; });
+
+  desktopSort.addEventListener("change", () => { setSort(desktopSort.value); mobileSort.value = desktopSort.value; });
+  mobileSort.addEventListener("change", () => { setSort(mobileSort.value); desktopSort.value = mobileSort.value; });
+
+  $("#clearFilters").addEventListener("click", () => {
+    search = "";
+    sort = "featured";
+    desktopSearch.value = "";
+    mobileSearch.value = "";
+    desktopSort.value = "featured";
+    mobileSort.value = "featured";
+    renderProducts();
+    showToast("Cleared");
+  });
+
+  // Ctrl/Cmd + K to focus search
+  window.addEventListener("keydown", (e) => {
+    const isK = (e.key || "").toLowerCase() === "k";
+    if (isK && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      (window.innerWidth >= 768 ? desktopSearch : mobileSearch).focus();
+    }
+  });
+}
+
+// ---------- Security: escape HTML ----------
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[m]));
+}
+
+// ---------- Init ----------
+document.addEventListener("DOMContentLoaded", () => {
+  // theme init
+  initTheme();
+  const tbtn = $("#themeToggle");
+  if (tbtn) {
+    tbtn.addEventListener("click", () => {
+      const isDark = document.documentElement.classList.contains("dark");
+      setTheme(isDark ? "light" : "dark");
+    });
+  }
+
+  // app init
+  $("#year").textContent = new Date().getFullYear();
+  bindSearchSort();
+  renderProducts();
+  renderCartBadge();
+  renderCart();
+});
+
+
+// --- បញ្ចូលគ្នា៖ Checkout Form Submission ---
+$("#checkoutForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const payBtn = e.target.querySelector('button[type="submit"]');
+  if (payBtn.disabled) return;
+
+  const phoneEl = $("#phone");
+  const addressEl = $("#address");
+
+  if (!phoneEl?.value.trim() || !addressEl?.value.trim()) {
+    showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
+    return;
+  }
+
+  // បង្ហាញ Loading State
+  payBtn.disabled = true;
+  const originalText = payBtn.textContent;
+  payBtn.textContent = "កំពុងដំណើរការ...";
+  payBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+
+  const orderData = {
+    telegramId: tgUser?.id?.toString() || "WEB_USER",
+    firstName: tgUser?.first_name || "Guest",
+    phone: phoneEl.value.trim(),
+    address: addressEl.value.trim(),
+    note: $("#note")?.value.trim() || "",
+    items: Object.entries(cart).map(([id, qty]) => {
+      const p = PRODUCTS.find(x => x.id === id);
+      return p ? { id, name: p.name, price: p.price, qty } : null;
     }).filter(Boolean),
     total: total().toFixed(2),
-    location: currentCoords
+    location: currentCoords // បានមកពី Map
   };
 
   try {
-    const res = await fetch('https://kevin-compete-antique-agrees.trycloudflare.com/api/place-order', {
+    const response = await fetch('https://kevin-compete-antique-agrees.trycloudflare.com/api/place-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData)
     });
-    const result = await res.json();
+
+    const result = await response.json();
+
     if (result.success) {
       showToast("ការកម្ម៉ង់បានជោគជ័យ! ✅");
-      cart = {}; saveCart(); promo.codeApplied = false; savePromo();
-      renderCartBadge(); renderCart(); closeCheckout(); closeCart();
+      // សម្អាតទិន្នន័យ
+      cart = {};
+      saveCart();
+      promo.codeApplied = false;
+      savePromo();
+      
+      // Update UI
+      renderCartBadge();
+      renderCart();
+      closeCheckout();
+      closeCart();
       e.target.reset();
-    } else throw new Error(result.error);
+    } else {
+      throw new Error(result.error || "Server error");
+    }
   } catch (err) {
-    showToast("Error: " + err.message);
+    console.error("Fetch Error:", err);
+    showToast("ការតភ្ជាប់មានបញ្ហា ❌");
   } finally {
+    // ដាក់ប៊ូតុងឱ្យដើរវិញ
     payBtn.disabled = false;
-    payBtn.textContent = "Pay";
+    payBtn.textContent = originalText;
+    payBtn.classList.remove("opacity-50", "cursor-not-allowed");
   }
-}
-
-// =========================
-// Initialization
-// =========================
-document.addEventListener("DOMContentLoaded", () => {
-  initTheme();
-  renderProducts();
-  renderCartBadge();
-  
-  $("#themeToggle").onclick = () => setTheme(document.documentElement.classList.contains("dark") ? "light" : "dark");
-  $("#openCartBtn").onclick = openCart;
-  $("#closeCartBtn").onclick = closeCart;
-  $("#cartOverlay").onclick = closeCart;
-  $("#checkoutBtn").onclick = openCheckout;
-  $("#closeCheckout").onclick = closeCheckout;
-  $("#checkoutForm").onsubmit = handleCheckout; // ប្រើតែមួយគត់នៅទីនេះ
-
-  // Search Logic
-  const sInput = $("#searchInput");
-  if (sInput) sInput.oninput = (e) => { search = e.target.value; renderProducts(); };
 });
 
-// Map Logic
+// Map
+let map, marker;
+let currentCoords = null; // សម្រាប់រក្សាទុក Lat/Lng
+
 function openMapModal() {
-  $("#map-container").classList.toggle("hidden");
+  const container = document.getElementById('map-container');
+  container.classList.toggle('hidden');
+
   if (!map) {
     map = L.map('map').setView([11.5564, 104.9282], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     marker = L.marker([11.5564, 104.9282], { draggable: true }).addTo(map);
-    marker.on('dragend', () => {
-      const pos = marker.getLatLng();
-      currentCoords = { lat: pos.lat, lng: pos.lng };
-      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.lat}&lon=${pos.lng}`).then(r => r.json()).then(d => $("#address").value = d.display_name);
+
+    marker.on('dragend', function () {
+      const latlng = marker.getLatLng();
+      currentCoords = { lat: latlng.lat, lng: latlng.lng };
+      updateAddressFromCoords(latlng.lat, latlng.lng);
     });
   }
 }
-let map, marker;
+
+// មុខងារស្វែងរកទីតាំង (Search)
+async function searchLocation() {
+  const query = document.getElementById('search-input').value;
+  if (!query) return;
+
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+    const data = await res.json();
+
+    if (data.length > 0) {
+      const { lat, lon, display_name } = data[0];
+      const newPos = [parseFloat(lat), parseFloat(lon)];
+
+      map.setView(newPos, 16);
+      marker.setLatLng(newPos);
+      currentCoords = { lat: parseFloat(lat), lng: parseFloat(lon) };
+      document.getElementById('address').value = display_name;
+    } else {
+      alert("រកមិនឃើញទីតាំងនេះទេ!");
+    }
+  } catch (error) {
+    console.error("Search error:", error);
+  }
+}
+
+// មុខងារចាប់យកទីតាំងបច្ចុប្បន្ន (Current Location)
+function getCurrentLocation() {
+  if (!navigator.geolocation) return alert("Browser របស់អ្នកមិនគាំទ្រការចាប់ទីតាំងទេ");
+
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude } = pos.coords;
+    const newPos = [latitude, longitude];
+
+    map.setView(newPos, 16);
+    marker.setLatLng(newPos);
+    currentCoords = { lat: latitude, lng: longitude };
+    await updateAddressFromCoords(latitude, longitude);
+  }, (err) => {
+    alert("មិនអាចចាប់យកទីតាំងបានទេ៖ " + err.message);
+  });
+}
+
+async function updateAddressFromCoords(lat, lng) {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+    const data = await res.json();
+    if (data.display_name) {
+      document.getElementById('address').value = data.display_name;
+      currentCoords = { lat, lng };
+    }
+  } catch (error) {
+    console.log("រកមិនឃើញអាសយដ្ឋាន:", error);
+  }
+}

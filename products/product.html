@@ -387,6 +387,19 @@
     </div>
 
     <script src="product.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready(); // Tell Telegram the app is ready
+        tg.expand();
+
+        // Safely request fullscreen only if supported (requires v8.0+)
+        if (tg.isVersionAtLeast('8.0')) {
+            tg.requestFullscreen();
+        } else {
+            console.log("Fullscreen not supported on this Telegram version.");
+        }
+    </script>
 </body>
 
 </html>
