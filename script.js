@@ -619,38 +619,54 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 // Map
 
 let map, marker;
+let currentCoords = null; // សម្រាប់បញ្ជូនទៅ Admin
 
 function openMapModal() {
   const container = document.getElementById('map-container');
-  container.classList.toggle('hidden');
+  container.classList.remove('hidden');
 
   if (!map) {
-    // កំណត់ទីតាំងដំបូងនៅភ្នំពេញ [Latitude, Longitude]
+    // ចំណុចកណ្តាលភ្នំពេញ
     map = L.map('map').setView([11.5564, 104.9282], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    // បង្កើត Marker ដែលអាចអូសបាន (Draggable)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     marker = L.marker([11.5564, 104.9282], { draggable: true }).addTo(map);
 
-    // នៅពេលអូស Marker រួច វានឹងទាញយកឈ្មោះទីតាំង (Reverse Geocoding)
-    marker.on('dragend', async function(e) {
+    marker.on('dragend', function() {
       const latlng = marker.getLatLng();
+      currentCoords = { lat: latlng.lat, lng: latlng.lng };
       updateAddressFromCoords(latlng.lat, latlng.lng);
     });
   }
+}
+
+function getCurrentLocation() {
+  if (!navigator.geolocation) return alert("Browser មិនគាំទ្រ Geolocation ទេ");
+  
+  const btn = document.getElementById("get-loc-btn");
+  btn.textContent = "កំពុងស្វែងរក...";
+
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude } = pos.coords;
+    currentCoords = { lat: latitude, lng: longitude };
+    
+    openMapModal();
+    map.setView([latitude, longitude], 16);
+    marker.setLatLng([latitude, longitude]);
+    await updateAddressFromCoords(latitude, longitude);
+    
+    btn.textContent = "📍 ប្រើទីតាំងបច្ចុប្បន្នរបស់ខ្ញុំ";
+  }, () => {
+    btn.textContent = "📍 ប្រើទីតាំងបច្ចុប្បន្នរបស់ខ្ញុំ";
+    alert("មិនអាចចាប់ទីតាំងបានទេ");
+  });
 }
 
 async function updateAddressFromCoords(lat, lng) {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
     const data = await res.json();
-    if (data.display_name) {
-      document.getElementById('address').value = data.display_name;
-    }
-  } catch (error) {
-    console.log("រកមិនឃើញអាសយដ្ឋាន:", error);
-  }
+    if (data.display_name) document.getElementById('address').value = data.display_name;
+  } catch (e) { console.error(e); }
 }
+
+// ក្នុងផ្នែក submitForm កុំភ្លេចបន្ថែម location: currentCoords ទៅក្នុង orderData
