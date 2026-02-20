@@ -615,3 +615,42 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
     payBtn.style.opacity = "1";
   }
 });
+
+// Map
+
+let map, marker;
+
+function openMapModal() {
+  const container = document.getElementById('map-container');
+  container.classList.toggle('hidden');
+
+  if (!map) {
+    // កំណត់ទីតាំងដំបូងនៅភ្នំពេញ [Latitude, Longitude]
+    map = L.map('map').setView([11.5564, 104.9282], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // បង្កើត Marker ដែលអាចអូសបាន (Draggable)
+    marker = L.marker([11.5564, 104.9282], { draggable: true }).addTo(map);
+
+    // នៅពេលអូស Marker រួច វានឹងទាញយកឈ្មោះទីតាំង (Reverse Geocoding)
+    marker.on('dragend', async function(e) {
+      const latlng = marker.getLatLng();
+      updateAddressFromCoords(latlng.lat, latlng.lng);
+    });
+  }
+}
+
+async function updateAddressFromCoords(lat, lng) {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+    const data = await res.json();
+    if (data.display_name) {
+      document.getElementById('address').value = data.display_name;
+    }
+  } catch (error) {
+    console.log("រកមិនឃើញអាសយដ្ឋាន:", error);
+  }
+}
