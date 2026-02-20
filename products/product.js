@@ -84,8 +84,20 @@ document.addEventListener('DOMContentLoaded', updateActiveNav);
 // search : productGrid
 // =========================
 
+// Data export
+// export const PRODUCTSALL = [
+//   { id: "p1", image: "/images/1.jpg", name: "Amber No. 7", brand: "ScentHouse", price: 69, size: "50ml", notes: ["amber", "vanilla", "musk"], vibe: "Warm • Smooth", featured: 1, des: "" },
+//   { id: "p2", image: "/images/2.jpg", name: "Rose Velvet", brand: "Maison Bloom", price: 54, size: "50ml", notes: ["rose", "peony", "powder"], vibe: "Soft • Romantic", featured: 2, des: "A soft and romantic rose scent with peony and powder notes." },
+//   { id: "p3", image: "/images/1.jpg", name: "Citrus Dawn", brand: "Atelier Fresh", price: 42, size: "30ml", notes: ["citrus", "bergamot", "tea"], vibe: "Bright • Clean", featured: 3, des: "A bright and clean citrus scent with bergamot and tea notes." },
+//   { id: "p4", image: "/images/2.jpg", name: "Oud Night", brand: "Desert Noir", price: 89, size: "60ml", notes: ["oud", "spice", "smoke"], vibe: "Bold • Luxe", featured: 4, des: "A bold and luxurious oud scent with spice and smoke notes." },
+//   { id: "p5", image: "/images/1.jpg", name: "Jasmine Breeze", brand: "ScentHouse", price: 59, size: "50ml", notes: ["jasmine", "green tea", "musk"], vibe: "Fresh • Elegant", featured: 5, des: "A fresh and elegant jasmine scent with green tea and musk notes." },
+//   { id: "p6", image: "/images/2.jpg", name: "Leather & Smoke", brand: "Maison Bloom", price: 75, size: "50ml", notes: ["leather", "smoke", "wood"], vibe: "Rugged • Mysterious", featured: 6, des: "A rugged and mysterious leather scent with smoke and wood notes." },
+//   { id: "p7", image: "/images/1.jpg", name: "Vanilla Sky", brand: "Desert Noir", price: 49, size: "30ml", notes: ["vanilla", "caramel", "sandalwood"], vibe: "Sweet • Cozy", featured: 7, des: "A sweet and cozy vanilla scent with caramel and sandalwood notes." },
+//   { id: "p8", image: "/images/2.jpg", name: "Ocean Mist", brand: "Atelier Fresh", price: 44, size: "30ml", notes: ["sea salt", "jasmine", "musk"], vibe: "Fresh • Aquatic", featured: 8, des: "A fresh and aquatic ocean scent with sea salt, jasmine, and musk notes." },
+// ];
+
 // ---------- Data product ----------
-const PRODUCTS = [
+const PRODUCTSALL = [
   { id: "p1", image: "/images/1.jpg", name: "Amber No. 7", brand: "ScentHouse", price: 69, size: "50ml", notes: ["amber", "vanilla", "musk"], vibe: "Warm • Smooth", featured: 1, des: "" },
   { id: "p2", image: "/images/2.jpg", name: "Rose Velvet", brand: "Maison Bloom", price: 54, size: "50ml", notes: ["rose", "peony", "powder"], vibe: "Soft • Romantic", featured: 2, des: "A soft and romantic rose scent with peony and powder notes." },
   { id: "p3", image: "/images/1.jpg", name: "Citrus Dawn", brand: "Atelier Fresh", price: 42, size: "30ml", notes: ["citrus", "bergamot", "tea"], vibe: "Bright • Clean", featured: 3, des: "A bright and clean citrus scent with bergamot and tea notes." },
@@ -139,7 +151,7 @@ function cartCount() { return Object.values(cart).reduce((a, b) => a + b, 0); }
 
 function subtotal() {
   return Object.entries(cart).reduce((sum, [id, qty]) => {
-    const p = PRODUCTS.find(x => x.id === id);
+    const p = PRODUCTSALL.find(x => x.id === id); // Changed
     return sum + (p ? p.price * qty : 0);
   }, 0);
 }
@@ -233,7 +245,7 @@ function productCard(p) {
 
 // ----------- Show Product Detail ----------
 function showDetail(id) {
-  const product = PRODUCTS.find(p => p.id === id);
+  const product = PRODUCTSALL.find(p => p.id === id); // Changed
   if (!product) return;
 
   // Fill the Modal Data
@@ -241,7 +253,7 @@ function showDetail(id) {
   $("#detail-title").innerText = product.name;
   $("#detail-brand").innerText = product.brand;
   $("#detail-notes").innerHTML = product.notes.map(n => `<span class="rounded-full border bg-slate-50 px-2.5 py-1 text-sm text-slate-600
-                                         dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">${escapeHtml(n)}</span>`).join(" ");
+                                           dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">${escapeHtml(n)}</span>`).join(" ");
   $("#detail-category").innerText = `${product.vibe} • ${product.size}`;
   $("#detail-price").innerText = money(product.price);
 
@@ -263,7 +275,7 @@ function closeDetail() {
 }
 
 function getFilteredSortedProducts() {
-  let items = [...PRODUCTS];
+  let items = [...PRODUCTSALL]; // Changed
 
   if (search.trim()) {
     const q = search.trim().toLowerCase();
@@ -345,19 +357,6 @@ const closeCart = () => {
   document.body.classList.remove("no-scroll"); // Unlock background
 }
 
-// function showDetail(id) {
-//   // ... existing logic to find product ...
-//   $("#detail-modal").classList.remove("hidden");
-//   $("#detail-modal").classList.add("flex");
-//   document.body.classList.add("no-scroll"); // Lock background
-// }
-
-// function closeDetail() {
-//   $("#detail-modal").classList.add("hidden");
-//   $("#detail-modal").classList.remove("flex");
-//   document.body.classList.remove("no-scroll"); // Unlock background
-// }
-
 $("#openCartBtn").addEventListener("click", () => { openCart(); renderCart(); });
 $("#closeCartBtn").addEventListener("click", closeCart);
 $("#cartOverlay").addEventListener("click", closeCart);
@@ -388,13 +387,13 @@ function cartRow(p, qty) {
           <div class="mt-3 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2">
               <button data-dec="${p.id}" class="rounded-xl border bg-white px-3 py-2 text-sm hover:bg-slate-50
-                                         dark:bg-slate-950 dark:border-slate-700 dark:hover:bg-slate-900">−</button>
+                                          dark:bg-slate-950 dark:border-slate-700 dark:hover:bg-slate-900">−</button>
               <span class="min-w-[2ch] text-center text-sm font-medium">${qty}</span>
               <button data-inc="${p.id}" class="rounded-xl border bg-white px-3 py-2 text-sm hover:bg-slate-50
-                                         dark:bg-slate-950 dark:border-slate-700 dark:hover:bg-slate-900">+</button>
+                                          dark:bg-slate-950 dark:border-slate-700 dark:hover:bg-slate-900">+</button>
             </div>
             <button data-del="${p.id}" class="rounded-xl border bg-white px-3 py-2 text-xs font-medium hover:bg-slate-50
-                                        dark:bg-slate-950 dark:border-slate-700 dark:hover:bg-slate-900">
+                                         dark:bg-slate-950 dark:border-slate-700 dark:hover:bg-slate-900">
               Remove
             </button>
           </div>
@@ -408,7 +407,7 @@ function renderCart() {
   $("#emptyCart").classList.toggle("hidden", hasItems);
 
   $("#cartItems").innerHTML = entries.map(([id, qty]) => {
-    const p = PRODUCTS.find(x => x.id === id);
+    const p = PRODUCTSALL.find(x => x.id === id); // Changed
     return p ? cartRow(p, qty) : "";
   }).join("");
 
@@ -493,7 +492,7 @@ $("#checkoutForm").addEventListener("submit", (e) => {
     payment: $("#payment").value,
     note: $("#note").value.trim(),
     items: Object.entries(cart).map(([id, qty]) => {
-      const p = PRODUCTS.find(x => x.id === id);
+      const p = PRODUCTSALL.find(x => x.id === id); // Changed
       return { id, name: p?.name, price: p?.price, qty };
     }),
     total: total(),
@@ -578,17 +577,20 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// --- បញ្ចូលគ្នា៖ Checkout Form Submission ---
+// --- បញ្ចូលគ្នា៖ Checkout Form Submission (កំណែទម្រង់សុវត្ថិភាពខ្ពស់) ---
 $("#checkoutForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const payBtn = e.target.querySelector('button[type="submit"]');
-  if (payBtn.disabled) return;
+  if (payBtn?.disabled) return;
 
-  const phoneEl = $("#phone");
-  const addressEl = $("#address");
+  // ប្រើ document.getElementById និង ?.value ដើម្បីការពារ Error Null
+  const phoneValue = document.getElementById("phone")?.value.trim();
+  const addressValue = document.getElementById("address")?.value.trim();
+  const noteValue = document.getElementById("note")?.value.trim() || "";
 
-  if (!phoneEl?.value.trim() || !addressEl?.value.trim()) {
+  // ត្រួតពិនិត្យទិន្នន័យចាំបាច់
+  if (!phoneValue || !addressValue) {
     showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
     return;
   }
@@ -604,15 +606,15 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
   const orderData = {
     telegramId: tgUser?.id?.toString() || "WEB_USER",
     firstName: tgUser?.first_name || "Guest",
-    phone: phoneEl.value.trim(),
-    address: addressEl.value.trim(),
-    note: $("#note")?.value.trim() || "",
+    phone: phoneValue,
+    address: addressValue,
+    note: noteValue,
     items: Object.entries(cart).map(([id, qty]) => {
-      const p = PRODUCTS.find(x => x.id === id);
+      const p = PRODUCTSALL.find(x => x.id === id);
       return p ? { id, name: p.name, price: p.price, qty } : null;
     }).filter(Boolean),
     total: total().toFixed(2),
-    location: currentCoords // បានមកពី Map
+    location: currentCoords // ប្រសិនបើអ្នកមិនទាន់ចុចលើ Map វានឹងផ្ញើ null
   };
 
   try {
@@ -626,29 +628,28 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 
     if (result.success) {
       showToast("ការកម្ម៉ង់បានជោគជ័យ! ✅");
-      // សម្អាតទិន្នន័យ
       cart = {};
       saveCart();
       promo.codeApplied = false;
       savePromo();
       
-      // Update UI
       renderCartBadge();
       renderCart();
       closeCheckout();
       closeCart();
       e.target.reset();
     } else {
-      throw new Error(result.error || "Server error");
+      throw new Error(result.error || "Server rejected the order");
     }
   } catch (err) {
     console.error("Fetch Error:", err);
-    showToast("ការតភ្ជាប់មានបញ្ហា ❌");
+    showToast("ការតភ្ជាប់មានបញ្ហា ឬ URL មិនត្រឹមត្រូវ ❌");
   } finally {
-    // ដាក់ប៊ូតុងឱ្យដើរវិញ
-    payBtn.disabled = false;
-    payBtn.textContent = originalText;
-    payBtn.classList.remove("opacity-50", "cursor-not-allowed");
+    if (payBtn) {
+      payBtn.disabled = false;
+      payBtn.textContent = originalText;
+      payBtn.classList.remove("opacity-50", "cursor-not-allowed");
+    }
   }
 });
 

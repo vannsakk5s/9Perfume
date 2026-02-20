@@ -84,6 +84,15 @@ document.addEventListener('DOMContentLoaded', updateActiveNav);
 // search : productGrid
 // =========================
 
+// import { PRODUCTSALL } from './products/product.js';
+
+// function subtotal() {
+//   return Object.entries(cart).reduce((sum, [id, qty]) => {
+//     const p = PRODUCTSALL.find(x => x.id === id); 
+//     return sum + (p ? p.price * qty : 0);
+//   }, 0);
+// }
+
 // ---------- Data popular ----------
 const PRODUCTS = [
   { id: "p1", image: "/images/1.jpg", name: "Amber No. 7", brand: "ScentHouse", price: 69, size: "50ml", notes: ["amber", "vanilla", "musk"], vibe: "Warm • Smooth", featured: 1, des: "" },
