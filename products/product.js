@@ -155,7 +155,7 @@ function addToCart(id) {
   saveCart();
   renderCart();
   renderCartBadge();
-  renderProducts();
+  updateCardBadge(id);
   showToast("Added to cart ✅");
 }
 
@@ -165,6 +165,28 @@ function setQty(id, qty) {
   saveCart();
   renderCart();
   renderCartBadge();
+}
+
+function updateCardBadge(id) {
+  const qty = cart[id] || 0;
+  // រក article card ទាំងអស់ដែល onclick មាន id នោះ
+  document.querySelectorAll(`[onclick="showDetail('${id}')"]`).forEach(card => {
+    let badge = card.querySelector('.qty-badge');
+    const addBtn = card.querySelector(`[onclick*="addToCart('${id}')"]`);
+    if (!addBtn) return;
+    const wrapper = addBtn.parentElement;
+
+    if (qty > 0) {
+      if (!badge) {
+        badge = document.createElement('div');
+        badge.className = 'qty-badge absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700';
+        wrapper.appendChild(badge);
+      }
+      badge.innerHTML = `<span class="text-slate-900 dark:text-white">${qty}</span>`;
+    } else {
+      if (badge) badge.remove();
+    }
+  });
 }
 
 // ---------- Products render ----------
@@ -220,7 +242,7 @@ function productCard(p) {
         
           
           ${quantity > 0 ? `
-            <div class="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border
+            <div class="qty-badge absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border
                    dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700">
               <span class="text-slate-900 dark:text-white">${quantity}</span>
             </div>
@@ -318,15 +340,6 @@ function renderProducts() {
 
   // ៣. បង្ហាញទៅក្នុង Container
   container.innerHTML = finalHtml || `<div class="text-center py-20 text-slate-500">No products found.</div>`;
-
-  // --- ចំណុចបន្ថែមដើម្បីឱ្យប៊ូតុងដំណើរការ (FIX) ---
-  // យើងត្រូវស្វែងរកប៊ូតុងដែលមាន Attribute [data-add] ទាំងអស់ដែលទើបនឹងបង្កើត រួចភ្ជាប់ Event ឱ្យវា
-  container.querySelectorAll("[data-add]").forEach(btn => {
-    btn.onclick = function() {
-      const productId = this.getAttribute("data-add");
-      addToCart(productId);
-    };
-  });
 }
 
 // receipt modal (for demo, just shows cart)
@@ -492,35 +505,36 @@ $("#checkoutBtn").addEventListener("click", openCheckout);
 $("#closeCheckout").addEventListener("click", closeCheckout);
 checkoutBackdrop.addEventListener("click", (e) => { if (e.target === checkoutBackdrop) closeCheckout(); });
 
-$("#checkoutForm").addEventListener("submit", (e) => {
-  e.preventDefault();
+// $("#checkoutForm").addEventListener("submit", (e) => {
+//   e.preventDefault();
 
-  const order = {
-    name: $("#name").value.trim(),
-    phone: $("#phone").value.trim(),
-    address: $("#address").value.trim(),
-    payment: $("#payment").value,
-    note: $("#note").value.trim(),
-    items: Object.entries(cart).map(([id, qty]) => {
-      const p = PRODUCTS.find(x => x.id === id);
-      return { id, name: p?.name, price: p?.price, qty };
-    }),
-    total: total(),
-    promoApplied: promo.codeApplied
-  };
+//   const order = {
+//     name: $("#name").value.trim(),
+//     phone: $("#phone").value.trim(),
+//     address: $("#address").value.trim(),
+//     payment: $("#payment").value,
+//     note: $("#note").value.trim(),
+//     items: Object.entries(cart).map(([id, qty]) => {
+//       const p = PRODUCTS.find(x => x.id === id);
+//       return { id, name: p?.name, price: p?.price, qty };
+//     }),
+//     total: total(),
+//     promoApplied: promo.codeApplied
+//   };
 
-  console.log("ORDER (demo):", order);
+//   console.log("ORDER (demo):", order);
 
-  closeCheckout();
-  closeCart();
-  cart = {};
-  saveCart();
-  promo.codeApplied = false;
-  savePromo();
-  renderCartBadge();
-  showToast("Order placed ✅ (demo)");
-  e.target.reset();
-});
+//   closeCheckout();
+//   closeCart();
+//   cart = {};
+//   saveCart();
+//   promo.codeApplied = false;
+//   savePromo();
+//   renderCartBadge();
+//   showToast("Order placed ✅ (demo)");
+//   e.target.reset();
+// });
+
 
 // ---------- Search / sort / clear ----------
 function bindSearchSort() {
