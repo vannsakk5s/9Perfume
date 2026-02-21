@@ -318,6 +318,15 @@ function renderProducts() {
 
   // ៣. បង្ហាញទៅក្នុង Container
   container.innerHTML = finalHtml || `<div class="text-center py-20 text-slate-500">No products found.</div>`;
+
+  // --- ចំណុចបន្ថែមដើម្បីឱ្យប៊ូតុងដំណើរការ (FIX) ---
+  // យើងត្រូវស្វែងរកប៊ូតុងដែលមាន Attribute [data-add] ទាំងអស់ដែលទើបនឹងបង្កើត រួចភ្ជាប់ Event ឱ្យវា
+  container.querySelectorAll("[data-add]").forEach(btn => {
+    btn.onclick = function() {
+      const productId = this.getAttribute("data-add");
+      addToCart(productId);
+    };
+  });
 }
 
 // receipt modal (for demo, just shows cart)
