@@ -591,7 +591,7 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
   };
 
   try {
-    const response = await fetch('https://kevin-compete-antique-agrees.trycloudflare.com/api/place-order', {
+    const response = await fetch('https://totally-flat-ericsson-karaoke.trycloudflare.com/api/place-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData)
