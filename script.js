@@ -554,44 +554,139 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // --- បញ្ចូលគ្នា៖ Checkout Form Submission ---
+// $("#checkoutForm").addEventListener("submit", async (e) => {
+//   e.preventDefault();
+
+//   const payBtn = e.target.querySelector('button[type="submit"]');
+//   if (payBtn.disabled) return;
+
+//   const phoneEl = $("#phone");
+//   const addressEl = $("#address");
+
+//   if (!phoneEl?.value.trim() || !addressEl?.value.trim()) {
+//     showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
+//     return;
+//   }
+
+//   // បង្ហាញ Loading State
+//   payBtn.disabled = true;
+//   const originalText = payBtn.textContent;
+//   payBtn.textContent = "Processing...";
+//   payBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+//   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+
+//   const orderData = {
+//     telegramId: tgUser?.id?.toString() || "WEB_USER",
+//     firstName: tgUser?.first_name || "Guest",
+//     phone: phoneEl.value.trim(),
+//     address: addressEl.value.trim(),
+//     note: $("#note")?.value.trim() || "",
+//     items: Object.entries(cart).map(([id, qty]) => {
+//       const p = PRODUCTS.find(x => x.id === id);
+//       return p ? { id, name: p.name, price: p.price, qty } : null;
+//     }).filter(Boolean),
+//     total: total().toFixed(2),
+//     location: currentCoords // បានមកពី Map
+//   };
+
+//   try {
+//     const response = await fetch('https://cocktail-superior-endorsed-possibilities.trycloudflare.com/api/place-order', {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify(orderData)
+//     });
+
+//     const result = await response.json();
+
+//     if (result.success) {
+//       showToast("Successfuly Order! ✅");
+//       // សម្អាតទិន្នន័យ
+//       cart = {};
+//       saveCart();
+//       promo.codeApplied = false;
+//       savePromo();
+      
+//       // Update UI
+//       renderCartBadge();
+//       renderCart();
+//       closeCheckout();
+//       closeCart();
+//       e.target.reset();
+//     } else {
+//       throw new Error(result.error || "Server error");
+//     }
+//   } catch (err) {
+//     console.error("Fetch Error:", err);
+//     showToast("ការតភ្ជាប់មានបញ្ហា ❌");
+//   } finally {
+//     // ដាក់ប៊ូតុងឱ្យដើរវិញ
+//     payBtn.disabled = false;
+//     payBtn.textContent = originalText;
+//     payBtn.classList.remove("opacity-50", "cursor-not-allowed");
+//   }
+// });
+
+// កែសម្រួលក្នុងផ្នែក $("#checkoutForm").addEventListener("submit", async (e) => { ... })
+
 $("#checkoutForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const payBtn = e.target.querySelector('button[type="submit"]');
-  if (payBtn.disabled) return;
-
+  // ទាញយក Element ដោយសុវត្ថិភាព
   const phoneEl = $("#phone");
   const addressEl = $("#address");
+  const noteEl = $("#note");
 
-  if (!phoneEl?.value.trim() || !addressEl?.value.trim()) {
+  // បើរក Element មិនឃើញ វានឹងឈប់ដំណើរការដើម្បីកុំឱ្យ Error
+  if (!phoneEl || !addressEl) {
+    console.error("រកមិនឃើញ Input Phone ឬ Address ក្នុង HTML ទេ!");
+    showToast("មានបញ្ហាបច្ចេកទេសក្នុងទម្រង់បែបបទ! ⚠️");
+    return;
+  }
+
+  const phoneVal = phoneEl.value.trim();
+  const addressVal = addressEl.value.trim();
+
+  if (!phoneVal || !addressVal) {
     showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
     return;
   }
 
-  // បង្ហាញ Loading State
+  const payBtn = e.target.querySelector('button[type="submit"]');
+  if (payBtn.disabled) return;
+
+  // ១. បង្កើត QR String និង Hash (ប្រើ KHQR SDK)
+  const amount = total();
+  const md5Hash = "generated_hash_from_khqr_sdk"; 
+
+  // ២. បង្ហាញ Loading State
   payBtn.disabled = true;
   const originalText = payBtn.textContent;
   payBtn.textContent = "Processing...";
-  payBtn.classList.add("opacity-50", "cursor-not-allowed");
 
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
 
   const orderData = {
     telegramId: tgUser?.id?.toString() || "WEB_USER",
     firstName: tgUser?.first_name || "Guest",
-    phone: phoneEl.value.trim(),
-    address: addressEl.value.trim(),
-    note: $("#note")?.value.trim() || "",
+    phone: phoneVal,
+    address: addressVal,
+    note: noteEl?.value.trim() || "",
     items: Object.entries(cart).map(([id, qty]) => {
       const p = PRODUCTS.find(x => x.id === id);
       return p ? { id, name: p.name, price: p.price, qty } : null;
     }).filter(Boolean),
-    total: total().toFixed(2),
-    location: currentCoords // បានមកពី Map
+    total: amount.toFixed(2),
+    location: currentCoords,
+    transactionHash: md5Hash
   };
 
+  // ប្រើ Localhost បើអ្នកតេស្តក្នុងម៉ាស៊ីនផ្ទាល់ ឬ URL Cloudflare បើអ្នកបើក Tunnel រួចរាល់
+  const API_BASE = "https://cocktail-superior-endorsed-possibilities.trycloudflare.com"; 
+
   try {
-    const response = await fetch('https://totally-flat-ericsson-karaoke.trycloudflare.com/api/place-order', {
+    // ៣. រក្សាទុក Order ទៅកាន់ Database
+    const response = await fetch(`${API_BASE}/api/place-order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData)
@@ -600,30 +695,25 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
     const result = await response.json();
 
     if (result.success) {
-      showToast("Successfuly Order! ✅");
-      // សម្អាតទិន្នន័យ
-      cart = {};
-      saveCart();
-      promo.codeApplied = false;
-      savePromo();
-      
-      // Update UI
-      renderCartBadge();
-      renderCart();
-      closeCheckout();
-      closeCart();
-      e.target.reset();
-    } else {
-      throw new Error(result.error || "Server error");
+      // ៤. បង្កើត Deeplink ដើម្បីបើក App Bakong
+      const bakongRes = await fetch(`${API_BASE}/api/checkout/bakong`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qrString: "QR_STRING_FROM_SDK" })
+      });
+      const bakongData = await bakongRes.json();
+
+      if (bakongData.responseCode === 0) { // Success response
+        window.location.href = bakongData.data.shortLink;
+        checkPaymentStatus(md5Hash); // ចាប់ផ្ដើម Polling
+      }
     }
   } catch (err) {
-    console.error("Fetch Error:", err);
-    showToast("ការតភ្ជាប់មានបញ្ហា ❌");
+    console.error("Network Error:", err);
+    showToast("មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ ❌");
   } finally {
-    // ដាក់ប៊ូតុងឱ្យដើរវិញ
     payBtn.disabled = false;
     payBtn.textContent = originalText;
-    payBtn.classList.remove("opacity-50", "cursor-not-allowed");
   }
 });
 
@@ -701,4 +791,52 @@ async function updateAddressFromCoords(lat, lng) {
   } catch (error) {
     console.log("រកមិនឃើញអាសយដ្ឋាន:", error);
   }
+}
+
+// ១. មុខងារសម្រាប់បង្កើត QR Link និងបើក App
+async function handlePayment(qrStringFromSDK) {
+    const response = await fetch('https://cocktail-superior-endorsed-possibilities.trycloudflare.com/api/checkout/bakong', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qrString: qrStringFromSDK })
+    });
+    
+    const result = await response.json();
+    if (result.responseCode === 0) {
+        // បើក App Bakong ឬ App ធនាគារផ្សេងៗ
+        window.location.href = result.data.shortLink; 
+        
+        // ចាប់ផ្ដើមឆែកមើលថាតើភ្ញៀវបង់រួចឬនៅ (Polling)
+        checkPaymentStatus(generatedHash);
+    }
+}
+
+// ២. មុខងារសម្រាប់ឆែកស្ថានភាពស្វ័យប្រវត្តិ
+function checkPaymentStatus(hash) {
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch(`https://cocktail-superior-endorsed-possibilities.trycloudflare.com/api/payment/verify/${hash}`);
+      const statusData = await res.json();
+
+      // បើបង់រួចរាល់ (responseCode: 0)
+      if (statusData.responseCode === 0) {
+        clearInterval(interval); // ឈប់ឆែក
+        showToast("ការបង់ប្រាក់ជោគជ័យ! ✅");
+        
+        // សម្អាត Cart
+        cart = {};
+        saveCart();
+        renderCartBadge();
+        renderCart();
+        
+        // បិទ Modal និងបញ្ជូនទៅទំព័រជោគជ័យ
+        closeCheckout();
+        closeCart();
+        setTimeout(() => { window.location.href = "/success.html"; }, 2000);
+      }
+      // បើ errorCode ជា 1 (រកមិនឃើញ) វានឹងបន្តឆែកទៀត
+    } catch (e) {
+      console.error("Polling error:", e);
+    }
+  }, 5000); // ឆែករៀងរាល់ ៥ វិនាទី
 }
