@@ -415,7 +415,8 @@
             <input required id="address"
               class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 bg-white dark:bg-slate-900 dark:border-slate-700"
               placeholder="Street, city, details" />
-            <button type="button" onclick="openMapModal()" class="mt-1 border dark:border-slate-700 bg-white dark:bg-slate-900 p-3 rounded-2xl">
+            <button type="button" onclick="openMapModal()"
+              class="mt-1 border dark:border-slate-700 bg-white dark:bg-slate-900 p-3 rounded-2xl">
               <img src="./images/map.png" alt="map">
             </button>
           </div>
@@ -437,7 +438,9 @@
             </div>
 
             <div class="absolute bottom-0 flex justify-center items-center w-full z-20">
-              <p class="bg-slate-50 dark:bg-slate-900 text-[10px] px-2 py-0.5 rounded-t-lg text-slate-500 dark:text-slate-300 italic text-center">សូមទាញចំណុចពណ៌ខៀវទៅកាន់ទីតាំងជាក់លាក់របស់អ្នក
+              <p
+                class="bg-slate-50 dark:bg-slate-900 text-[10px] px-2 py-0.5 rounded-t-lg text-slate-500 dark:text-slate-300 italic text-center">
+                សូមទាញចំណុចពណ៌ខៀវទៅកាន់ទីតាំងជាក់លាក់របស់អ្នក
               </p>
             </div>
           </div>
@@ -455,11 +458,38 @@
           </div>
         </div>
 
-        <button id="payBtn" type="submit" class="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800
+        <!-- <button id="payBtn" type="submit" class="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800
                        dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+          Pay
+        </button> -->
+
+        <button id="payBtn" type="submit"
+          class="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
           Pay
         </button>
       </form>
+
+      <div id="bakongModal"
+        class="fixed inset-0 z-[150] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900 text-center">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">បង់ប្រាក់ជាមួយ Bakong KHQR</h3>
+          <p class="text-xs text-slate-500 mb-4">ស្កេនរូបភាពខាងក្រោមដើម្បីទូទាត់ប្រាក់</p>
+
+          <div class="flex justify-center bg-white p-4 rounded-2xl border mb-4">
+            <canvas id="bakongQRCanvas"></canvas>
+          </div>
+
+          <a id="bakongDeeplink" href="#"
+            class="block w-full rounded-2xl bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700 mb-2">
+            បើកកម្មវិធីបាគង (Open App)
+          </a>
+
+          <button type="button" onclick="closeBakongModal()"
+            class="w-full py-2 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400">
+            បោះបង់ (Cancel)
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
