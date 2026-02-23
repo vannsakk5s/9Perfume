@@ -754,81 +754,171 @@ document.addEventListener("DOMContentLoaded", () => {
 // });
 
 // --- បញ្ចូលគ្នា៖ Checkout Form Submission ---
+// $("#checkoutForm").addEventListener("submit", async (e) => {
+//   e.preventDefault();
+
+//   const payBtn = e.target.querySelector('button[type="submit"]');
+//   if (payBtn.disabled) return;
+
+//   const phoneEl = $("#phone");
+//   const addressEl = $("#address");
+
+//   if (!phoneEl?.value.trim() || !addressEl?.value.trim()) {
+//     showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
+//     return;
+//   }
+
+//   // បង្ហាញ Loading State
+//   payBtn.disabled = true;
+//   const originalText = payBtn.textContent;
+//   payBtn.textContent = "Processing...";
+//   payBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+//   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+
+//   const orderData = {
+//     telegramId: tgUser?.id?.toString() || "WEB_USER",
+//     firstName: tgUser?.first_name || "Guest",
+//     phone: phoneEl.value.trim(),
+//     address: addressEl.value.trim(),
+//     note: $("#note")?.value.trim() || "",
+//     items: Object.entries(cart).map(([id, qty]) => {
+//       const p = PRODUCTS.find(x => x.id === id);
+//       return p ? { id, name: p.name, price: p.price, qty } : null;
+//     }).filter(Boolean),
+//     total: total().toFixed(2),
+//     location: currentCoords // បានមកពី Map
+//   };
+
+//   try {
+//     const response = await fetch('https://arabic-farm-casa-marine.trycloudflare.com/api/place-order', {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify(orderData)
+//     });
+
+//     const result = await response.json();
+
+//     if (result.success) {
+//       showToast("Successfuly Order! ✅");
+//       // សម្អាតទិន្នន័យ
+//       cart = {};
+//       saveCart();
+//       promo.codeApplied = false;
+//       savePromo();
+      
+//       // Update UI
+//       renderCartBadge();
+//       renderCart();
+//       closeCheckout();
+//       closeCart();
+//       e.target.reset();
+//     } else {
+//       throw new Error(result.error || "Server error");
+//     }
+//   } catch (err) {
+//     console.error("Fetch Error:", err);
+//     showToast("ការតភ្ជាប់មានបញ្ហា ❌");
+//   } finally {
+//     // ដាក់ប៊ូតុងឱ្យដើរវិញ
+//     payBtn.disabled = false;
+//     payBtn.textContent = originalText;
+//     payBtn.classList.remove("opacity-50", "cursor-not-allowed");
+//   }
+// });
+
+
+const API_BASE_URL = "https://arabic-farm-casa-marine.trycloudflare.com/api"; 
+
 $("#checkoutForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const payBtn = e.target.querySelector('button[type="submit"]');
-  if (payBtn.disabled) return;
+  const payBtn = $("#payBtn");
+  const originalText = payBtn.textContent;
 
-  const phoneEl = $("#phone");
-  const addressEl = $("#address");
+  // 1. Validate Inputs
+  const phone = $("#phone").value.trim();
+  const address = $("#address").value.trim();
 
-  if (!phoneEl?.value.trim() || !addressEl?.value.trim()) {
-    showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
+  if (!phone || !address) {
+    showToast("⚠️ Please fill in Phone and Address");
     return;
   }
 
-  // បង្ហាញ Loading State
+  // 2. Loading State
   payBtn.disabled = true;
-  const originalText = payBtn.textContent;
   payBtn.textContent = "Processing...";
   payBtn.classList.add("opacity-50", "cursor-not-allowed");
 
+  // 3. Get Telegram User Data (if available)
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
 
+  // 4. Prepare Data Payload
   const orderData = {
-    telegramId: tgUser?.id?.toString() || "WEB_USER",
-    firstName: tgUser?.first_name || "Guest",
-    phone: phoneEl.value.trim(),
-    address: addressEl.value.trim(),
-    note: $("#note")?.value.trim() || "",
+    telegramId: tgUser?.id?.toString() || "WEB_GUEST", // Fallback if not in Telegram
+    firstName: tgUser?.first_name || $("#name")?.value || "Guest",
+    username: tgUser?.username || "",
+    phone: phone,
+    address: address,
+    note: $("#note").value.trim(),
+    total: total(), // specific value
     items: Object.entries(cart).map(([id, qty]) => {
       const p = PRODUCTS.find(x => x.id === id);
-      return p ? { id, name: p.name, price: p.price, qty } : null;
-    }).filter(Boolean),
-    total: total().toFixed(2),
-    location: currentCoords // បានមកពី Map
+      return { 
+        id: id,
+        name: p.name, 
+        price: p.price, 
+        qty: qty 
+      };
+    }),
+    location: currentCoords // { lat: ..., lng: ... } from your map logic
   };
 
   try {
-    const response = await fetch('https://arabic-farm-casa-marine.trycloudflare.com/api/place-order', {
+    // 5. Send POST Request to Backend
+    const response = await fetch(`${API_BASE_URL}/place-order`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(orderData)
     });
 
     const result = await response.json();
 
     if (result.success) {
-      showToast("Successfuly Order! ✅");
-      // សម្អាតទិន្នន័យ
+      // 6. Success Handling
+      showToast("Order Placed Successfully! ✅");
+      
+      // Clear Data
       cart = {};
       saveCart();
       promo.codeApplied = false;
       savePromo();
       
-      // Update UI
+      // Reset UI
       renderCartBadge();
       renderCart();
       closeCheckout();
       closeCart();
       e.target.reset();
+
+      // Optional: Close Telegram Mini App after success
+      // window.Telegram.WebApp.close(); 
     } else {
-      throw new Error(result.error || "Server error");
+      throw new Error(result.error || "Server responded with error");
     }
+
   } catch (err) {
-    console.error("Fetch Error:", err);
-    showToast("ការតភ្ជាប់មានបញ្ហា ❌");
+    console.error("Order Error:", err);
+    showToast("❌ Connection Failed. Check Console.");
   } finally {
-    // ដាក់ប៊ូតុងឱ្យដើរវិញ
+    // 7. Reset Button State
     payBtn.disabled = false;
     payBtn.textContent = originalText;
     payBtn.classList.remove("opacity-50", "cursor-not-allowed");
   }
 });
-
-
-
 
 
 // Map
