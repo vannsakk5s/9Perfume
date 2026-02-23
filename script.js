@@ -562,270 +562,270 @@ function closeBakongModal() {
 }
 
 // --- Modified Checkout Submission ---
-$("#checkoutForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const payBtn = $("#payBtn");
-  const API_BASE = "https://elliott-camping-marco-imaging.trycloudflare.com";
-
-  // 1. Loading State
-  payBtn.disabled = true;
-  payBtn.textContent = "កំពុងដំណើរការ...";
-
-  const orderData = {
-    phone: $("#phone").value.trim(),
-    address: $("#address").value.trim(),
-    total: total().toFixed(2), // total() helper exists in your script
-    items: Object.entries(cart).map(([id, qty]) => {
-        const p = PRODUCTS.find(x => x.id === id);
-        return { name: p?.name, qty };
-    })
-  };
-
-  try {
-    // 2. Step 1: Tell backend to generate KHQR and Deeplink
-    const response = await fetch(`${API_BASE}/api/checkout`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    });
-    const data = await response.json();
-
-    if (!data.success) throw new Error("Initialization failed");
-
-    // 3. Step 2: Show Bakong Modal & Render QR
-    $("#bakongModal").classList.remove("hidden");
-    $("#bakongModal").classList.add("flex");
-    
-    // Generate QR Image using QRious (ensure library is loaded)
-    new QRious({
-      element: document.getElementById('bakongQRCanvas'),
-      value: data.qrString,
-      size: 200
-    });
-
-    $("#bakongDeeplink").href = data.deeplink;
-
-    // 4. Step 3: Start Polling for payment status
-    window.bakongInterval = setInterval(async () => {
-      const statusRes = await fetch(`${API_BASE}/api/check-status/${data.md5}`);
-      const statusData = await statusRes.json();
-
-      if (statusData.responseCode === 0) { // Success from Bakong API
-        clearInterval(window.bakongInterval);
-        showToast("ការបង់ប្រាក់ជោគជ័យ! ✅");
-        
-        // Finalize order in your system
-        finalizeOrder(orderData);
-      }
-    }, 3000);
-
-  } catch (err) {
-    console.error(err);
-    showToast("មានបញ្ហាបច្ចេកទេស ❌");
-  } finally {
-    payBtn.disabled = false;
-    payBtn.textContent = "Pay";
-  }
-});
-
-// --- ១. មុខងារបិទ Modal និងឈប់ឆែកស្ថានភាព ---
-function closeBakongModal() {
-  const modal = document.getElementById("bakongModal");
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
-  if (window.bakongInterval) {
-    clearInterval(window.bakongInterval);
-    window.bakongInterval = null;
-  }
-}
-
-// --- ២. មុខងារបញ្ចប់ការទិញ និងសម្អាតទិន្នន័យ ---
-function finalizeOrder(orderData) {
-  closeBakongModal();
-  closeCheckout(); // មុខងារបិទផ្ទាំង Checkout ដែលមានស្រាប់
-  closeCart();     // មុខងារបិទ Cart
-
-  // សម្អាតទិន្នន័យក្នុង Cart State
-  cart = {};
-  saveCart();
-  if (typeof promo !== 'undefined') promo.codeApplied = false;
-  if (typeof savePromo === 'function') savePromo();
-
-  // Reset Form
-  document.getElementById("checkoutForm").reset();
-
-  // Update UI
-  renderCartBadge();
-  renderCart();
-
-  showToast("ការបង់ប្រាក់ជោគជ័យ និងបានរក្សាទុកការកុម្ម៉ង់! ✅");
-
-  // ប្តូរទៅកាន់ទំព័រ Success ឬ About បន្ទាប់ពី ១.៥ វិនាទី
-  setTimeout(() => {
-    window.location.href = "/about.html";
-  }, 1500);
-}
-
-// --- ៣. មុខងារ Submit Form ទៅកាន់ Bakong API ---
-document.getElementById("checkoutForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const payBtn = document.getElementById("payBtn");
-  const API_BASE = "https://jeans-probe-surfing-buzz.trycloudflare.com";
-
-  // បង្ហាញ Loading State
-  payBtn.disabled = true;
-  payBtn.textContent = "កំពុងដំណើរការ...";
-
-  // រៀបចំទិន្នន័យផ្ញើទៅ Server
-  const orderData = {
-    phone: document.getElementById("phone").value.trim(),
-    address: document.getElementById("address").value.trim(),
-    note: document.getElementById("note").value.trim(),
-    total: typeof total === 'function' ? total().toFixed(2) : "0.00",
-    items: Object.entries(cart).map(([id, qty]) => {
-      const p = PRODUCTS.find(x => x.id === id);
-      return { name: p?.name, qty: qty, price: p?.price };
-    })
-  };
-
-  try {
-    // ហៅ API ដើម្បីបង្កើត QR និង Deeplink
-    const response = await fetch(`${API_BASE}/api/checkout`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    });
-    const data = await response.json();
-
-    if (!data.success) throw new Error("Initialization failed");
-
-    // បង្ហាញ Modal បាគង
-    const modal = document.getElementById("bakongModal");
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-
-    // បង្កើតរូប QR Code ដោយប្រើបណ្ណាល័យ QRious
-    new QRious({
-      element: document.getElementById('bakongQRCanvas'),
-      value: data.qrString,
-      size: 200
-    });
-
-    // កំណត់ Link សម្រាប់បើក App
-    document.getElementById("bakongDeeplink").href = data.deeplink;
-
-    // ចាប់ផ្តើមឆែកស្ថានភាពបង់ប្រាក់ (Polling)
-    window.bakongInterval = setInterval(async () => {
-      try {
-        const statusRes = await fetch(`${API_BASE}/api/check-status/${data.md5}`);
-        const statusData = await statusRes.json();
-
-        // responseCode: 0 មានន័យថាអតិថិជនបង់លុយរួចរាល់
-        if (statusData.responseCode === 0) {
-          clearInterval(window.bakongInterval);
-          
-          // បន្ទាប់ពីបង់លុយរួច យើងផ្ញើទិន្នន័យទៅរក្សាទុកក្នុង Database (Order)
-          await fetch(`${API_BASE}/api/place-order`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...orderData,
-              telegramId: window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || "WEB_USER",
-              firstName: window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || "Guest"
-            })
-          });
-
-          finalizeOrder(orderData);
-        }
-      } catch (err) {
-        console.error("Polling error:", err);
-      }
-    }, 3000);
-
-  } catch (err) {
-    console.error(err);
-    showToast("មានបញ្ហាបច្ចេកទេស ❌");
-  } finally {
-    payBtn.disabled = false;
-    payBtn.textContent = "Pay";
-  }
-});
-
-// --- បញ្ចូលគ្នា៖ Checkout Form Submission ---
 // $("#checkoutForm").addEventListener("submit", async (e) => {
 //   e.preventDefault();
 
-//   const payBtn = e.target.querySelector('button[type="submit"]');
-//   if (payBtn.disabled) return;
+//   const payBtn = $("#payBtn");
+//   const API_BASE = "https://elliott-camping-marco-imaging.trycloudflare.com";
 
-//   const phoneEl = $("#phone");
-//   const addressEl = $("#address");
-
-//   if (!phoneEl?.value.trim() || !addressEl?.value.trim()) {
-//     showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
-//     return;
-//   }
-
-//   // បង្ហាញ Loading State
+//   // 1. Loading State
 //   payBtn.disabled = true;
-//   const originalText = payBtn.textContent;
-//   payBtn.textContent = "Processing...";
-//   payBtn.classList.add("opacity-50", "cursor-not-allowed");
-
-//   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+//   payBtn.textContent = "កំពុងដំណើរការ...";
 
 //   const orderData = {
-//     telegramId: tgUser?.id?.toString() || "WEB_USER",
-//     firstName: tgUser?.first_name || "Guest",
-//     phone: phoneEl.value.trim(),
-//     address: addressEl.value.trim(),
-//     note: $("#note")?.value.trim() || "",
+//     phone: $("#phone").value.trim(),
+//     address: $("#address").value.trim(),
+//     total: total().toFixed(2), // total() helper exists in your script
 //     items: Object.entries(cart).map(([id, qty]) => {
-//       const p = PRODUCTS.find(x => x.id === id);
-//       return p ? { id, name: p.name, price: p.price, qty } : null;
-//     }).filter(Boolean),
-//     total: total().toFixed(2),
-//     location: currentCoords // បានមកពី Map
+//         const p = PRODUCTS.find(x => x.id === id);
+//         return { name: p?.name, qty };
+//     })
 //   };
 
 //   try {
-//     const response = await fetch('https://elliott-camping-marco-imaging.trycloudflare.com/api/place-order', {
+//     // 2. Step 1: Tell backend to generate KHQR and Deeplink
+//     const response = await fetch(`${API_BASE}/api/checkout`, {
 //       method: 'POST',
 //       headers: { 'Content-Type': 'application/json' },
 //       body: JSON.stringify(orderData)
 //     });
+//     const data = await response.json();
 
-//     const result = await response.json();
+//     if (!data.success) throw new Error("Initialization failed");
 
-//     if (result.success) {
-//       showToast("Successfuly Order! ✅");
-//       // សម្អាតទិន្នន័យ
-//       cart = {};
-//       saveCart();
-//       promo.codeApplied = false;
-//       savePromo();
-      
-//       // Update UI
-//       renderCartBadge();
-//       renderCart();
-//       closeCheckout();
-//       closeCart();
-//       e.target.reset();
-//     } else {
-//       throw new Error(result.error || "Server error");
-//     }
+//     // 3. Step 2: Show Bakong Modal & Render QR
+//     $("#bakongModal").classList.remove("hidden");
+//     $("#bakongModal").classList.add("flex");
+    
+//     // Generate QR Image using QRious (ensure library is loaded)
+//     new QRious({
+//       element: document.getElementById('bakongQRCanvas'),
+//       value: data.qrString,
+//       size: 200
+//     });
+
+//     $("#bakongDeeplink").href = data.deeplink;
+
+//     // 4. Step 3: Start Polling for payment status
+//     window.bakongInterval = setInterval(async () => {
+//       const statusRes = await fetch(`${API_BASE}/api/check-status/${data.md5}`);
+//       const statusData = await statusRes.json();
+
+//       if (statusData.responseCode === 0) { // Success from Bakong API
+//         clearInterval(window.bakongInterval);
+//         showToast("ការបង់ប្រាក់ជោគជ័យ! ✅");
+        
+//         // Finalize order in your system
+//         finalizeOrder(orderData);
+//       }
+//     }, 3000);
+
 //   } catch (err) {
-//     console.error("Fetch Error:", err);
-//     showToast("ការតភ្ជាប់មានបញ្ហា ❌");
+//     console.error(err);
+//     showToast("មានបញ្ហាបច្ចេកទេស ❌");
 //   } finally {
-//     // ដាក់ប៊ូតុងឱ្យដើរវិញ
 //     payBtn.disabled = false;
-//     payBtn.textContent = originalText;
-//     payBtn.classList.remove("opacity-50", "cursor-not-allowed");
+//     payBtn.textContent = "Pay";
 //   }
 // });
+
+// // --- ១. មុខងារបិទ Modal និងឈប់ឆែកស្ថានភាព ---
+// function closeBakongModal() {
+//   const modal = document.getElementById("bakongModal");
+//   modal.classList.add("hidden");
+//   modal.classList.remove("flex");
+//   if (window.bakongInterval) {
+//     clearInterval(window.bakongInterval);
+//     window.bakongInterval = null;
+//   }
+// }
+
+// // --- ២. មុខងារបញ្ចប់ការទិញ និងសម្អាតទិន្នន័យ ---
+// function finalizeOrder(orderData) {
+//   closeBakongModal();
+//   closeCheckout(); // មុខងារបិទផ្ទាំង Checkout ដែលមានស្រាប់
+//   closeCart();     // មុខងារបិទ Cart
+
+//   // សម្អាតទិន្នន័យក្នុង Cart State
+//   cart = {};
+//   saveCart();
+//   if (typeof promo !== 'undefined') promo.codeApplied = false;
+//   if (typeof savePromo === 'function') savePromo();
+
+//   // Reset Form
+//   document.getElementById("checkoutForm").reset();
+
+//   // Update UI
+//   renderCartBadge();
+//   renderCart();
+
+//   showToast("ការបង់ប្រាក់ជោគជ័យ និងបានរក្សាទុកការកុម្ម៉ង់! ✅");
+
+//   // ប្តូរទៅកាន់ទំព័រ Success ឬ About បន្ទាប់ពី ១.៥ វិនាទី
+//   setTimeout(() => {
+//     window.location.href = "/about.html";
+//   }, 1500);
+// }
+
+// // --- ៣. មុខងារ Submit Form ទៅកាន់ Bakong API ---
+// document.getElementById("checkoutForm").addEventListener("submit", async (e) => {
+//   e.preventDefault();
+
+//   const payBtn = document.getElementById("payBtn");
+//   const API_BASE = "https://arabic-farm-casa-marine.trycloudflare.com";
+
+//   // បង្ហាញ Loading State
+//   payBtn.disabled = true;
+//   payBtn.textContent = "កំពុងដំណើរការ...";
+
+//   // រៀបចំទិន្នន័យផ្ញើទៅ Server
+//   const orderData = {
+//     phone: document.getElementById("phone").value.trim(),
+//     address: document.getElementById("address").value.trim(),
+//     note: document.getElementById("note").value.trim(),
+//     total: typeof total === 'function' ? total().toFixed(2) : "0.00",
+//     items: Object.entries(cart).map(([id, qty]) => {
+//       const p = PRODUCTS.find(x => x.id === id);
+//       return { name: p?.name, qty: qty, price: p?.price };
+//     })
+//   };
+
+//   try {
+//     // ហៅ API ដើម្បីបង្កើត QR និង Deeplink
+//     const response = await fetch(`${API_BASE}/api/checkout`, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify(orderData)
+//     });
+//     const data = await response.json();
+
+//     if (!data.success) throw new Error("Initialization failed");
+
+//     // បង្ហាញ Modal បាគង
+//     const modal = document.getElementById("bakongModal");
+//     modal.classList.remove("hidden");
+//     modal.classList.add("flex");
+
+//     // បង្កើតរូប QR Code ដោយប្រើបណ្ណាល័យ QRious
+//     new QRious({
+//       element: document.getElementById('bakongQRCanvas'),
+//       value: data.qrString,
+//       size: 200
+//     });
+
+//     // កំណត់ Link សម្រាប់បើក App
+//     document.getElementById("bakongDeeplink").href = data.deeplink;
+
+//     // ចាប់ផ្តើមឆែកស្ថានភាពបង់ប្រាក់ (Polling)
+//     window.bakongInterval = setInterval(async () => {
+//       try {
+//         const statusRes = await fetch(`${API_BASE}/api/check-status/${data.md5}`);
+//         const statusData = await statusRes.json();
+
+//         // responseCode: 0 មានន័យថាអតិថិជនបង់លុយរួចរាល់
+//         if (statusData.responseCode === 0) {
+//           clearInterval(window.bakongInterval);
+          
+//           // បន្ទាប់ពីបង់លុយរួច យើងផ្ញើទិន្នន័យទៅរក្សាទុកក្នុង Database (Order)
+//           await fetch(`${API_BASE}/api/place-order`, {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify({
+//               ...orderData,
+//               telegramId: window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || "WEB_USER",
+//               firstName: window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || "Guest"
+//             })
+//           });
+
+//           finalizeOrder(orderData);
+//         }
+//       } catch (err) {
+//         console.error("Polling error:", err);
+//       }
+//     }, 3000);
+
+//   } catch (err) {
+//     console.error(err);
+//     showToast("មានបញ្ហាបច្ចេកទេស ❌");
+//   } finally {
+//     payBtn.disabled = false;
+//     payBtn.textContent = "Pay";
+//   }
+// });
+
+// --- បញ្ចូលគ្នា៖ Checkout Form Submission ---
+$("#checkoutForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const payBtn = e.target.querySelector('button[type="submit"]');
+  if (payBtn.disabled) return;
+
+  const phoneEl = $("#phone");
+  const addressEl = $("#address");
+
+  if (!phoneEl?.value.trim() || !addressEl?.value.trim()) {
+    showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
+    return;
+  }
+
+  // បង្ហាញ Loading State
+  payBtn.disabled = true;
+  const originalText = payBtn.textContent;
+  payBtn.textContent = "Processing...";
+  payBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+
+  const orderData = {
+    telegramId: tgUser?.id?.toString() || "WEB_USER",
+    firstName: tgUser?.first_name || "Guest",
+    phone: phoneEl.value.trim(),
+    address: addressEl.value.trim(),
+    note: $("#note")?.value.trim() || "",
+    items: Object.entries(cart).map(([id, qty]) => {
+      const p = PRODUCTS.find(x => x.id === id);
+      return p ? { id, name: p.name, price: p.price, qty } : null;
+    }).filter(Boolean),
+    total: total().toFixed(2),
+    location: currentCoords // បានមកពី Map
+  };
+
+  try {
+    const response = await fetch('https://arabic-farm-casa-marine.trycloudflare.com/api/place-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      showToast("Successfuly Order! ✅");
+      // សម្អាតទិន្នន័យ
+      cart = {};
+      saveCart();
+      promo.codeApplied = false;
+      savePromo();
+      
+      // Update UI
+      renderCartBadge();
+      renderCart();
+      closeCheckout();
+      closeCart();
+      e.target.reset();
+    } else {
+      throw new Error(result.error || "Server error");
+    }
+  } catch (err) {
+    console.error("Fetch Error:", err);
+    showToast("ការតភ្ជាប់មានបញ្ហា ❌");
+  } finally {
+    // ដាក់ប៊ូតុងឱ្យដើរវិញ
+    payBtn.disabled = false;
+    payBtn.textContent = originalText;
+    payBtn.classList.remove("opacity-50", "cursor-not-allowed");
+  }
+});
 
 
 
