@@ -840,6 +840,15 @@ function closePaymentModal() {
 
 // Event Listener សម្រាប់ប៊ូតុងបិទ
 document.getElementById('closePaymentBtn').addEventListener('click', closePaymentModal);
+document.getElementById('saveQRBtn').onclick = function() {
+    const canvas = document.getElementById('qrCanvas');
+    // បង្កើត Link បណ្តោះអាសន្ន
+    const link = document.createElement('a');
+    link.download = '9Perfume-Payment-QR.png';
+    // បំប្លែង Canvas ទៅជារូបភាព PNG
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+};
 
 // Map
 let map, marker;
