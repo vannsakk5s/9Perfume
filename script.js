@@ -555,11 +555,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // --- Bakong Modal Controls ---
-function closeBakongModal() {
-  $("#bakongModal").classList.add("hidden");
-  $("#bakongModal").classList.remove("flex");
-  if (window.bakongInterval) clearInterval(window.bakongInterval);
-}
+// function closeBakongModal() {
+//   $("#bakongModal").classList.add("hidden");
+//   $("#bakongModal").classList.remove("flex");
+//   if (window.bakongInterval) clearInterval(window.bakongInterval);
+// }
 
 // --- Modified Checkout Submission ---
 // $("#checkoutForm").addEventListener("submit", async (e) => {
