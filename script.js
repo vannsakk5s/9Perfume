@@ -933,52 +933,57 @@ function showPaymentModal(qrString, md5, orderId, amount) {
 }
 
 function startCheckingPayment(md5, orderId) {
-  // ឈប់ឆែករបស់ចាស់សិន (បើមាន)
-  if (checkPaymentInterval) clearInterval(checkPaymentInterval);
-
-  let attempts = 0;
-
-  // ឆែករៀងរាល់ 3 វិនាទីម្តង
-  checkPaymentInterval = setInterval(async () => {
-    attempts++;
-
-    // បើឆែកយូរពេក (ឧទាហរណ៍ 60 វិនាទី) ឈប់ឆែក
-    if (attempts > 20) {
-      clearInterval(checkPaymentInterval);
-      showToast("ការបង់ប្រាក់អស់ពេលកំណត់ (Timeout) ⚠️");
-      return;
+    // ១. បញ្ឈប់ការឆែកចាស់
+    if (checkPaymentInterval) clearInterval(checkPaymentInterval);
+    
+    // ២. ប្រាកដថាមាន MD5 ទើបដំណើរការ
+    if (!md5) {
+        console.error("Missing MD5 hash for payment verification");
+        return;
     }
 
-    try {
-      // សួរទៅ Backend
-      const res = await fetch(`${API_BASE_URL}/api/check-payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ md5, orderId })
-      });
-      const result = await res.json();
+    let attempts = 0;
+    checkPaymentInterval = setInterval(async () => {
+        attempts++;
 
-      // បើបង់ជោគជ័យ!
-      if (result.success) {
-        clearInterval(checkPaymentInterval); // ឈប់ឆែក
-        closePaymentModal(); // បិទ Modal
+        if (attempts > 30) { // ៣០ ដង x ៣ វិនាទី = ១ នាទី ៣០ វិនាទី
+            clearInterval(checkPaymentInterval);
+            showToast("ការបង់ប្រាក់អស់ពេលកំណត់ (Timeout) ⚠️");
+            return;
+        }
 
-        // សម្អាត Cart
-        cart = {};
-        saveCart();
-        renderCartBadge();
-        renderCart();
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/check-payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ md5, orderId })
+            });
 
-        // បង្ហាញសារជោគជ័យ
-        showToast("បង់ប្រាក់ជោគជ័យ! (Payment Successful) ✅");
+            // ប្រសិនបើ Server ងាប់ ឬ Error (មិនមែន JSON)
+            if (!res.ok) throw new Error("Server response not OK");
 
-        // Reset Form
-        document.getElementById("checkoutForm").reset();
-      }
-    } catch (err) {
-      console.log("Checking payment error...", err);
-    }
-  }, 3000); // 3000ms = 3 seconds
+            const result = await res.json();
+
+            if (result.success) {
+                clearInterval(checkPaymentInterval);
+                closePaymentModal();
+
+                cart = {};
+                saveCart();
+                renderCartBadge();
+                renderCart();
+
+                showToast("បង់ប្រាក់ជោគជ័យ! (Payment Successful) ✅");
+                document.getElementById("checkoutForm").reset();
+                
+                // ជម្រើសបន្ថែម៖ បញ្ជូនទៅកាន់ទំព័រផ្សេងក្រោយជោគជ័យ
+                // setTimeout(() => window.location.href = "/success.html", 1500);
+            }
+        } catch (err) {
+            // កុំដាក់ showToast ក្នុង catch នេះ ព្រោះវាលោតរំខានរាល់ ៣ វិនាទីពេល Internet ដាច់
+            console.log("Polling payment status..."); 
+        }
+    }, 3000);
 }
 
 // មុខងារបិទ Modal
