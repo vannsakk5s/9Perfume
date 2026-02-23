@@ -904,82 +904,82 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 // ក្នុង script.js
 
 function showPaymentModal(qrString, md5, orderId, amount) {
-    const modal = document.getElementById('paymentModal');
-    
-    // ១. បង្ហាញ Modal សិនដើម្បីឱ្យ Canvas មានទំហំ
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+  const modal = document.getElementById('paymentModal');
 
-    document.getElementById('paymentTotal').textContent = `$${parseFloat(amount).toFixed(2)}`;
+  // ១. បង្ហាញ Modal សិនដើម្បីឱ្យ Canvas មានទំហំ
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
 
-    // ២. បង្កើត QR Code ឱ្យច្បាស់ល្អ (High Resolution)
-    try {
-        new QRious({
-            element: document.getElementById('qrCanvas'),
-            value: qrString,
-            size: 600,       // បង្កើនកម្រិតច្បាស់ (Resolution)
-            level: 'H',      // Error Correction ខ្ពស់បំផុត (ជួយឱ្យស្កេនស្រួល)
-            padding: 25      // បន្ថែមតំបន់សជុំវិញ (Quiet Zone) ចាំបាច់សម្រាប់ App ធនាគារ
-        });
-    } catch (e) {
-        console.error("QR Rendering Error:", e);
-    }
+  document.getElementById('paymentTotal').textContent = `$${parseFloat(amount).toFixed(2)}`;
 
-    startCheckingPayment(md5, orderId);
+  // ២. បង្កើត QR Code ឱ្យច្បាស់ល្អ (High Resolution)
+  try {
+    new QRious({
+      element: document.getElementById('qrCanvas'),
+      value: qrString,
+      size: 240,       // បង្កើនកម្រិតច្បាស់ (Resolution)
+      level: 'H',      // Error Correction ខ្ពស់បំផុត (ជួយឱ្យស្កេនស្រួល)
+      padding: 10      // បន្ថែមតំបន់សជុំវិញ (Quiet Zone) ចាំបាច់សម្រាប់ App ធនាគារ
+    });
+  } catch (e) {
+    console.error("QR Rendering Error:", e);
+  }
+
+  startCheckingPayment(md5, orderId);
 }
 
 function startCheckingPayment(md5, orderId) {
-    // ១. បញ្ឈប់ការឆែកចាស់
-    if (checkPaymentInterval) clearInterval(checkPaymentInterval);
-    
-    // ២. ប្រាកដថាមាន MD5 ទើបដំណើរការ
-    if (!md5) {
-        console.error("Missing MD5 hash for payment verification");
-        return;
+  // ១. បញ្ឈប់ការឆែកចាស់
+  if (checkPaymentInterval) clearInterval(checkPaymentInterval);
+
+  // ២. ប្រាកដថាមាន MD5 ទើបដំណើរការ
+  if (!md5) {
+    console.error("Missing MD5 hash for payment verification");
+    return;
+  }
+
+  let attempts = 0;
+  checkPaymentInterval = setInterval(async () => {
+    attempts++;
+
+    if (attempts > 30) { // ៣០ ដង x ៣ វិនាទី = ១ នាទី ៣០ វិនាទី
+      clearInterval(checkPaymentInterval);
+      showToast("ការបង់ប្រាក់អស់ពេលកំណត់ (Timeout) ⚠️");
+      return;
     }
 
-    let attempts = 0;
-    checkPaymentInterval = setInterval(async () => {
-        attempts++;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/check-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ md5, orderId })
+      });
 
-        if (attempts > 30) { // ៣០ ដង x ៣ វិនាទី = ១ នាទី ៣០ វិនាទី
-            clearInterval(checkPaymentInterval);
-            showToast("ការបង់ប្រាក់អស់ពេលកំណត់ (Timeout) ⚠️");
-            return;
-        }
+      // ប្រសិនបើ Server ងាប់ ឬ Error (មិនមែន JSON)
+      if (!res.ok) throw new Error("Server response not OK");
 
-        try {
-            const res = await fetch(`${API_BASE_URL}/api/check-payment`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ md5, orderId })
-            });
+      const result = await res.json();
 
-            // ប្រសិនបើ Server ងាប់ ឬ Error (មិនមែន JSON)
-            if (!res.ok) throw new Error("Server response not OK");
+      if (result.success) {
+        clearInterval(checkPaymentInterval);
+        closePaymentModal();
 
-            const result = await res.json();
+        cart = {};
+        saveCart();
+        renderCartBadge();
+        renderCart();
 
-            if (result.success) {
-                clearInterval(checkPaymentInterval);
-                closePaymentModal();
+        showToast("បង់ប្រាក់ជោគជ័យ! (Payment Successful) ✅");
+        document.getElementById("checkoutForm").reset();
 
-                cart = {};
-                saveCart();
-                renderCartBadge();
-                renderCart();
-
-                showToast("បង់ប្រាក់ជោគជ័យ! (Payment Successful) ✅");
-                document.getElementById("checkoutForm").reset();
-                
-                // ជម្រើសបន្ថែម៖ បញ្ជូនទៅកាន់ទំព័រផ្សេងក្រោយជោគជ័យ
-                // setTimeout(() => window.location.href = "/success.html", 1500);
-            }
-        } catch (err) {
-            // កុំដាក់ showToast ក្នុង catch នេះ ព្រោះវាលោតរំខានរាល់ ៣ វិនាទីពេល Internet ដាច់
-            console.log("Polling payment status..."); 
-        }
-    }, 3000);
+        // ជម្រើសបន្ថែម៖ បញ្ជូនទៅកាន់ទំព័រផ្សេងក្រោយជោគជ័យ
+        // setTimeout(() => window.location.href = "/success.html", 1500);
+      }
+    } catch (err) {
+      // កុំដាក់ showToast ក្នុង catch នេះ ព្រោះវាលោតរំខានរាល់ ៣ វិនាទីពេល Internet ដាច់
+      console.log("Polling payment status...");
+    }
+  }, 3000);
 }
 
 // មុខងារបិទ Modal
@@ -995,25 +995,69 @@ function closePaymentModal() {
 // Event Listener សម្រាប់ប៊ូតុងបិទ
 document.getElementById('closePaymentBtn').addEventListener('click', closePaymentModal);
 
+document.getElementById('saveQRBtn').addEventListener('click', function () {
+  const canvas = document.getElementById('qrCanvas');
+
+  // បង្កើត Link បណ្តោះអាសន្ន
+  const link = document.createElement('a');
+
+  // កំណត់ឈ្មោះរូបភាពពេល Download
+  link.download = '9Perfume-Payment-QR.png';
+
+  // បំប្លែង Canvas ទៅជា URL រូបភាព
+  link.href = canvas.toDataURL('image/png');
+
+  // ធ្វើសកម្មភាពចុច Download
+  link.click();
+});
+
 
 // Map
 let map, marker;
 let currentCoords = null; // សម្រាប់រក្សាទុក Lat/Lng
 
+// function openMapModal() {
+//   const container = document.getElementById('map-container');
+//   container.classList.toggle('hidden');
+
+//   if (!map) {
+//     map = L.map('map').setView([11.5564, 104.9282], 13);
+//     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+//     marker = L.marker([11.5564, 104.9282], { draggable: true }).addTo(map);
+
+//     marker.on('dragend', function () {
+//       const latlng = marker.getLatLng();
+//       currentCoords = { lat: latlng.lat, lng: latlng.lng };
+//       updateAddressFromCoords(latlng.lat, latlng.lng);
+//     });
+//   }
+// }
+
 function openMapModal() {
   const container = document.getElementById('map-container');
-  container.classList.toggle('hidden');
+  container.classList.remove('hidden'); // បង្ហាញ Modal
 
   if (!map) {
+    // ... (កូដបង្កើត map របស់បងដដែល) ...
     map = L.map('map').setView([11.5564, 104.9282], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
     marker = L.marker([11.5564, 104.9282], { draggable: true }).addTo(map);
 
-    marker.on('dragend', function () {
-      const latlng = marker.getLatLng();
+    // កំណត់ currentCoords ដើម (Default)
+    currentCoords = { lat: 11.5564, lng: 104.9282 };
+
+    marker.on('dragend', function (e) {
+      const latlng = e.target.getLatLng();
       currentCoords = { lat: latlng.lat, lng: latlng.lng };
       updateAddressFromCoords(latlng.lat, latlng.lng);
     });
+
+  } else {
+    // 🔥 បន្ថែមត្រង់នេះ៖ Refresh ផែនទីពេលបើកម្តងទៀត
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
   }
 }
 
@@ -1071,3 +1115,4 @@ async function updateAddressFromCoords(lat, lng) {
     console.log("រកមិនឃើញអាសយដ្ឋាន:", error);
   }
 }
+

@@ -86,14 +86,14 @@ document.addEventListener('DOMContentLoaded', updateActiveNav);
 
 // ---------- Data product ----------
 const PRODUCTS = [
-  { id: "p1", image: "/images/1.jpg", name: "Amber No. 7", brand: "ScentHouse", price: 69, size: "50ml", notes: ["amber", "vanilla", "musk"], vibe: "Warm • Smooth", featured: 1, des: "" },
+  { id: "p1", image: "/images/1.jpg", name: "Amber No. 7", brand: "ScentHouse", price: 0.01, size: "50ml", notes: ["amber", "vanilla", "musk"], vibe: "Warm • Smooth", featured: 1, des: "" },
   { id: "p2", image: "/images/2.jpg", name: "Rose Velvet", brand: "Maison Bloom", price: 54, size: "50ml", notes: ["rose", "peony", "powder"], vibe: "Soft • Romantic", featured: 2, des: "A soft and romantic rose scent with peony and powder notes." },
   { id: "p3", image: "/images/1.jpg", name: "Citrus Dawn", brand: "Atelier Fresh", price: 42, size: "30ml", notes: ["citrus", "bergamot", "tea"], vibe: "Bright • Clean", featured: 3, des: "A bright and clean citrus scent with bergamot and tea notes." },
   { id: "p4", image: "/images/2.jpg", name: "Oud Night", brand: "Desert Noir", price: 89, size: "60ml", notes: ["oud", "spice", "smoke"], vibe: "Bold • Luxe", featured: 4, des: "A bold and luxurious oud scent with spice and smoke notes." },
   { id: "p5", image: "/images/1.jpg", name: "Jasmine Breeze", brand: "ScentHouse", price: 59, size: "50ml", notes: ["jasmine", "green tea", "musk"], vibe: "Fresh • Elegant", featured: 5, des: "A fresh and elegant jasmine scent with green tea and musk notes." },
   { id: "p6", image: "/images/2.jpg", name: "Leather & Smoke", brand: "Maison Bloom", price: 75, size: "50ml", notes: ["leather", "smoke", "wood"], vibe: "Rugged • Mysterious", featured: 6, des: "A rugged and mysterious leather scent with smoke and wood notes." },
   { id: "p7", image: "/images/1.jpg", name: "Vanilla Sky", brand: "Desert Noir", price: 49, size: "30ml", notes: ["vanilla", "caramel", "sandalwood"], vibe: "Sweet • Cozy", featured: 7, des: "A sweet and cozy vanilla scent with caramel and sandalwood notes." },
-  { id: "p8", image: "/images/2.jpg", name: "Ocean Mist", brand: "Atelier Fresh", price: 44, size: "30ml", notes: ["sea salt", "jasmine", "musk"], vibe: "Fresh • Aquatic", featured: 8, des: "A fresh and aquatic ocean scent with sea salt, jasmine, and musk notes." },
+  { id: "p8", image: "/images/2.jpg", name: "Ocean Mist", brand: "Atelier Fresh", price: 0.01, size: "30ml", notes: ["sea salt", "jasmine", "musk"], vibe: "Fresh • Aquatic", featured: 8, des: "A fresh and aquatic ocean scent with sea salt, jasmine, and musk notes." },
 ];
 
 // ---------- State ----------
@@ -602,78 +602,244 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // --- បញ្ចូលគ្នា៖ Checkout Form Submission ---
+// $("#checkoutForm").addEventListener("submit", async (e) => {
+//   e.preventDefault();
+
+//   const payBtn = e.target.querySelector('button[type="submit"]');
+//   if (payBtn.disabled) return;
+
+//   const phoneEl = $("#phone");
+//   const addressEl = $("#address");
+
+//   if (!phoneEl?.value.trim() || !addressEl?.value.trim()) {
+//     showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
+//     return;
+//   }
+
+//   // បង្ហាញ Loading State
+//   payBtn.disabled = true;
+//   const originalText = payBtn.textContent;
+//   payBtn.textContent = "Processing...";
+//   payBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+//   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+
+//   const orderData = {
+//     telegramId: tgUser?.id?.toString() || "WEB_USER",
+//     firstName: tgUser?.first_name || "Guest",
+//     phone: phoneEl.value.trim(),
+//     address: addressEl.value.trim(),
+//     note: $("#note")?.value.trim() || "",
+//     items: Object.entries(cart).map(([id, qty]) => {
+//       const p = PRODUCTS.find(x => x.id === id);
+//       return p ? { id, name: p.name, price: p.price, qty } : null;
+//     }).filter(Boolean),
+//     total: total().toFixed(2),
+//     location: currentCoords // បានមកពី Map
+//   };
+
+//   try {
+//     const response = await fetch('https://arabic-farm-casa-marine.trycloudflare.com/api/place-order', {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify(orderData)
+//     });
+
+//     const result = await response.json();
+
+//     if (result.success) {
+//       showToast("Successfuly Order! ✅");
+//       // សម្អាតទិន្នន័យ
+//       cart = {};
+//       saveCart();
+//       promo.codeApplied = false;
+//       savePromo();
+
+//       // Update UI
+//       renderCartBadge();
+//       renderCart();
+//       closeCheckout();
+//       closeCart();
+//       e.target.reset();
+//     } else {
+//       throw new Error(result.error || "Server error");
+//     }
+//   } catch (err) {
+//     console.error("Fetch Error:", err);
+//     showToast("ការតភ្ជាប់មានបញ្ហា ❌");
+//   } finally {
+//     // ដាក់ប៊ូតុងឱ្យដើរវិញ
+//     payBtn.disabled = false;
+//     payBtn.textContent = originalText;
+//     payBtn.classList.remove("opacity-50", "cursor-not-allowed");
+//   }
+// });
+
+// URL របស់ Server (ត្រូវប្រាកដថាត្រឹមត្រូវ)
+const API_BASE_URL = "https://tmp-mardi-charming-qualifying.trycloudflare.com";
+let checkPaymentInterval = null;
+
+// ==========================================
+// HANDLE CHECKOUT SUBMISSION
+// ==========================================
 $("#checkoutForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+  const payBtn = $("#payBtn");
 
-  const payBtn = e.target.querySelector('button[type="submit"]');
-  if (payBtn.disabled) return;
-
-  const phoneEl = $("#phone");
-  const addressEl = $("#address");
-
-  if (!phoneEl?.value.trim() || !addressEl?.value.trim()) {
+  // Validate Inputs
+  const phone = $("#phone").value.trim();
+  const address = $("#address").value.trim();
+  if (!phone || !address) {
     showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
     return;
   }
 
-  // បង្ហាញ Loading State
+  // 1. Loading State
   payBtn.disabled = true;
-  const originalText = payBtn.textContent;
-  payBtn.textContent = "Processing...";
-  payBtn.classList.add("opacity-50", "cursor-not-allowed");
+  payBtn.textContent = "Generating QR...";
+  payBtn.classList.add("opacity-50");
 
-  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-
+  // ទិន្នន័យ Order
   const orderData = {
-    telegramId: tgUser?.id?.toString() || "WEB_USER",
-    firstName: tgUser?.first_name || "Guest",
-    phone: phoneEl.value.trim(),
-    address: addressEl.value.trim(),
-    note: $("#note")?.value.trim() || "",
+    telegramId: window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || "WEB_USER",
+    firstName: window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || "Guest",
+    phone: phone,
+    address: address,
+    note: $("#note")?.value || "",
     items: Object.entries(cart).map(([id, qty]) => {
       const p = PRODUCTS.find(x => x.id === id);
       return p ? { id, name: p.name, price: p.price, qty } : null;
     }).filter(Boolean),
     total: total().toFixed(2),
-    location: currentCoords // បានមកពី Map
+    location: currentCoords
   };
 
   try {
-    const response = await fetch('https://arabic-farm-casa-marine.trycloudflare.com/api/place-order', {
+    // 2. ហៅ API place-order
+    const res = await fetch(`${API_BASE_URL}/api/place-order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData)
     });
+    const data = await res.json();
 
-    const result = await response.json();
-
-    if (result.success) {
-      showToast("Successfuly Order! ✅");
-      // សម្អាតទិន្នន័យ
-      cart = {};
-      saveCart();
-      promo.codeApplied = false;
-      savePromo();
-
-      // Update UI
-      renderCartBadge();
-      renderCart();
+    if (data.success && data.payment) {
+      // 3. ជោគជ័យ: បិទ Checkout ហើយបើក QR Modal
       closeCheckout();
-      closeCart();
-      e.target.reset();
+
+      // ហៅមុខងារបង្ហាញ QR និងចាប់ផ្តើមឆែកការបង់ប្រាក់
+      showPaymentModal(data.payment.qrString, data.payment.md5, data.orderId, data.payment.amount);
     } else {
-      throw new Error(result.error || "Server error");
+      showToast("បរាជ័យក្នុងការបង្កើតការកុម្ម៉ង់ ❌");
     }
+
   } catch (err) {
-    console.error("Fetch Error:", err);
-    showToast("ការតភ្ជាប់មានបញ្ហា ❌");
+    console.error(err);
+    showToast("Connection Error ❌");
   } finally {
-    // ដាក់ប៊ូតុងឱ្យដើរវិញ
     payBtn.disabled = false;
-    payBtn.textContent = originalText;
-    payBtn.classList.remove("opacity-50", "cursor-not-allowed");
+    payBtn.textContent = "Pay";
+    payBtn.classList.remove("opacity-50");
   }
 });
+
+// ==========================================
+// QR & PAYMENT CHECKING LOGIC
+// ==========================================
+
+// ក្នុង script.js
+
+function showPaymentModal(qrString, md5, orderId, amount) {
+  const modal = document.getElementById('paymentModal');
+
+  // ១. បង្ហាញ Modal សិនដើម្បីឱ្យ Canvas មានទំហំ
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  document.getElementById('paymentTotal').textContent = `$${parseFloat(amount).toFixed(2)}`;
+
+  // ២. បង្កើត QR Code ឱ្យច្បាស់ល្អ (High Resolution)
+  try {
+    new QRious({
+      element: document.getElementById('qrCanvas'),
+      value: qrString,
+      size: 240,       // បង្កើនកម្រិតច្បាស់ (Resolution)
+      level: 'H',      // Error Correction ខ្ពស់បំផុត (ជួយឱ្យស្កេនស្រួល)
+      padding: 10      // បន្ថែមតំបន់សជុំវិញ (Quiet Zone) ចាំបាច់សម្រាប់ App ធនាគារ
+    });
+  } catch (e) {
+    console.error("QR Rendering Error:", e);
+  }
+
+  startCheckingPayment(md5, orderId);
+}
+
+function startCheckingPayment(md5, orderId) {
+  // ១. បញ្ឈប់ការឆែកចាស់
+  if (checkPaymentInterval) clearInterval(checkPaymentInterval);
+
+  // ២. ប្រាកដថាមាន MD5 ទើបដំណើរការ
+  if (!md5) {
+    console.error("Missing MD5 hash for payment verification");
+    return;
+  }
+
+  let attempts = 0;
+  checkPaymentInterval = setInterval(async () => {
+    attempts++;
+
+    if (attempts > 30) { // ៣០ ដង x ៣ វិនាទី = ១ នាទី ៣០ វិនាទី
+      clearInterval(checkPaymentInterval);
+      showToast("ការបង់ប្រាក់អស់ពេលកំណត់ (Timeout) ⚠️");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/check-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ md5, orderId })
+      });
+
+      // ប្រសិនបើ Server ងាប់ ឬ Error (មិនមែន JSON)
+      if (!res.ok) throw new Error("Server response not OK");
+
+      const result = await res.json();
+
+      if (result.success) {
+        clearInterval(checkPaymentInterval);
+        closePaymentModal();
+
+        cart = {};
+        saveCart();
+        renderCartBadge();
+        renderCart();
+
+        showToast("បង់ប្រាក់ជោគជ័យ! (Payment Successful) ✅");
+        document.getElementById("checkoutForm").reset();
+
+        // ជម្រើសបន្ថែម៖ បញ្ជូនទៅកាន់ទំព័រផ្សេងក្រោយជោគជ័យ
+        // setTimeout(() => window.location.href = "/success.html", 1500);
+      }
+    } catch (err) {
+      // កុំដាក់ showToast ក្នុង catch នេះ ព្រោះវាលោតរំខានរាល់ ៣ វិនាទីពេល Internet ដាច់
+      console.log("Polling payment status...");
+    }
+  }, 3000);
+}
+
+// មុខងារបិទ Modal
+function closePaymentModal() {
+  const modal = document.getElementById('paymentModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+
+  // ឈប់ឆែកការបង់ប្រាក់ពេលបិទផ្ទាំង
+  if (checkPaymentInterval) clearInterval(checkPaymentInterval);
+}
+
+// Event Listener សម្រាប់ប៊ូតុងបិទ
+document.getElementById('closePaymentBtn').addEventListener('click', closePaymentModal);
 
 // Map
 let map, marker;
@@ -681,18 +847,29 @@ let currentCoords = null; // សម្រាប់រក្សាទុក Lat/L
 
 function openMapModal() {
   const container = document.getElementById('map-container');
-  container.classList.toggle('hidden');
+  container.classList.remove('hidden'); // បង្ហាញ Modal
 
   if (!map) {
+    // ... (កូដបង្កើត map របស់បងដដែល) ...
     map = L.map('map').setView([11.5564, 104.9282], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
     marker = L.marker([11.5564, 104.9282], { draggable: true }).addTo(map);
 
-    marker.on('dragend', function () {
-      const latlng = marker.getLatLng();
+    // កំណត់ currentCoords ដើម (Default)
+    currentCoords = { lat: 11.5564, lng: 104.9282 };
+
+    marker.on('dragend', function (e) {
+      const latlng = e.target.getLatLng();
       currentCoords = { lat: latlng.lat, lng: latlng.lng };
       updateAddressFromCoords(latlng.lat, latlng.lng);
     });
+
+  } else {
+    // 🔥 បន្ថែមត្រង់នេះ៖ Refresh ផែនទីពេលបើកម្តងទៀត
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
   }
 }
 
