@@ -905,34 +905,26 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 
 function showPaymentModal(qrString, md5, orderId, amount) {
     const modal = document.getElementById('paymentModal');
-    const totalEl = document.getElementById('paymentTotal');
-    const orderIdEl = document.getElementById('paymentOrderId'); // បន្ថែមសម្រាប់បង្ហាញលេខវិក្កយបត្រ
-
-    // ១. បង្ហាញ Modal ជាមុនសិន
+    
+    // ១. បង្ហាញ Modal សិនដើម្បីឱ្យ Canvas មានទំហំ
     modal.classList.remove('hidden');
     modal.classList.add('flex');
 
-    // ២. បំពេញទិន្នន័យទឹកប្រាក់ និងលេខសម្គាល់
-    totalEl.textContent = `$${parseFloat(amount).toFixed(2)}`;
-    if (orderIdEl) orderIdEl.textContent = `Order ID: #${orderId.toString().slice(-6).toUpperCase()}`;
-    
-    // ៣. បង្កើត QR Code រូបភាព
+    document.getElementById('paymentTotal').textContent = `$${parseFloat(amount).toFixed(2)}`;
+
+    // ២. បង្កើត QR Code ឱ្យច្បាស់ល្អ (High Resolution)
     try {
         new QRious({
             element: document.getElementById('qrCanvas'),
             value: qrString,
-            size: 600,       // កម្រិតច្បាស់ខ្ពស់សម្រាប់កាមេរ៉ាស្កេន
-            level: 'H',      // Error Correction ខ្ពស់បំផុត (ជួយឱ្យស្កេនបានទោះជារូបភាពបែកខ្លះ)
-            padding: 20,     // បន្ថែមគម្លាតសជុំវិញ ដើម្បីឱ្យ App ធនាគារសម្គាល់ចំណុចខ្មៅបានច្បាស់
-            background: '#ffffff',
-            foreground: '#000000'
+            size: 600,       // បង្កើនកម្រិតច្បាស់ (Resolution)
+            level: 'H',      // Error Correction ខ្ពស់បំផុត (ជួយឱ្យស្កេនស្រួល)
+            padding: 25      // បន្ថែមតំបន់សជុំវិញ (Quiet Zone) ចាំបាច់សម្រាប់ App ធនាគារ
         });
     } catch (e) {
-        console.error("QR Error:", e);
-        showToast("Error generating QR code ❌");
+        console.error("QR Rendering Error:", e);
     }
 
-    // ៤. ចាប់ផ្តើមឆែកមើលការបង់ប្រាក់រៀងរាល់ ៣ វិនាទី
     startCheckingPayment(md5, orderId);
 }
 
