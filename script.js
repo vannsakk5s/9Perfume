@@ -829,96 +829,135 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 const API_BASE_URL = "https://arabic-farm-casa-marine.trycloudflare.com/api"; 
+let checkPaymentInterval = null;
 
 $("#checkoutForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    const payBtn = $("#payBtn");
+    
+    // ... (កូដ validate phone/address របស់អ្នកនៅដដែល) ...
 
-  const payBtn = $("#payBtn");
-  const originalText = payBtn.textContent;
+    // 1. Loading State
+    payBtn.disabled = true;
+    payBtn.textContent = "កំពុងបង្កើត QR Code...";
 
-  // 1. Validate Inputs
-  const phone = $("#phone").value.trim();
-  const address = $("#address").value.trim();
+    // ទិន្នន័យ Order
+    const orderData = {
+        // ... (ទិន្នន័យដដែលរបស់អ្នក: phone, address, items...)
+        total: total().toFixed(2),
+        // ...
+    };
 
-  if (!phone || !address) {
-    showToast("⚠️ Please fill in Phone and Address");
-    return;
-  }
+    try {
+        // 2. ហៅ API place-order
+        const res = await fetch(`${API_BASE_URL}/place-order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
+        const data = await res.json();
 
-  // 2. Loading State
-  payBtn.disabled = true;
-  payBtn.textContent = "Processing...";
-  payBtn.classList.add("opacity-50", "cursor-not-allowed");
+        if (data.success && data.payment) {
+            // 3. បិទផ្ទាំង Checkout ហើយបើកផ្ទាំង Payment QR
+            closeCheckout();
+            showPaymentModal(data.payment.qrString, data.payment.md5, data.orderId, data.payment.amount);
+        } else {
+            showToast("មានបញ្ហាក្នុងការបង្កើតការកុម្ម៉ង់ ❌");
+        }
 
-  // 3. Get Telegram User Data (if available)
-  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    } catch (err) {
+        console.error(err);
+        showToast("Error connection ❌");
+    } finally {
+        payBtn.disabled = false;
+        payBtn.textContent = "Pay";
+    }
+});
 
-  // 4. Prepare Data Payload
-  const orderData = {
-    telegramId: tgUser?.id?.toString() || "WEB_GUEST", // Fallback if not in Telegram
-    firstName: tgUser?.first_name || $("#name")?.value || "Guest",
-    username: tgUser?.username || "",
-    phone: phone,
-    address: address,
-    note: $("#note").value.trim(),
-    total: total(), // specific value
-    items: Object.entries(cart).map(([id, qty]) => {
-      const p = PRODUCTS.find(x => x.id === id);
-      return { 
-        id: id,
-        name: p.name, 
-        price: p.price, 
-        qty: qty 
-      };
-    }),
-    location: currentCoords // { lat: ..., lng: ... } from your map logic
-  };
-
-  try {
-    // 5. Send POST Request to Backend
-    const response = await fetch(`${API_BASE_URL}/place-order`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(orderData)
+// --- មុខងារបង្ហាញ QR និងឆែកការបង់ប្រាក់ ---
+function showPaymentModal(qrString, md5, orderId, amount) {
+    const modal = document.getElementById('paymentModal');
+    const totalEl = document.getElementById('paymentTotal');
+    
+    // បង្ហាញតម្លៃ
+    totalEl.textContent = `$${amount}`;
+    
+    // បង្កើត QR Code រូបភាព
+    new QRious({
+        element: document.getElementById('qrCanvas'),
+        value: qrString,
+        size: 200,
+        level: 'H'
     });
 
-    const result = await response.json();
+    // បង្ហាញ Modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
 
-    if (result.success) {
-      // 6. Success Handling
-      showToast("Order Placed Successfully! ✅");
-      
-      // Clear Data
-      cart = {};
-      saveCart();
-      promo.codeApplied = false;
-      savePromo();
-      
-      // Reset UI
-      renderCartBadge();
-      renderCart();
-      closeCheckout();
-      closeCart();
-      e.target.reset();
+    // **ចាប់ផ្តើមឆែកមើលថាគេបង់លុយហើយឬនៅ (Polling)**
+    startCheckingPayment(md5, orderId);
+}
 
-      // Optional: Close Telegram Mini App after success
-      // window.Telegram.WebApp.close(); 
-    } else {
-      throw new Error(result.error || "Server responded with error");
-    }
+function startCheckingPayment(md5, orderId) {
+    // ឈប់ឆែករបស់ចាស់សិន (បើមាន)
+    if (checkPaymentInterval) clearInterval(checkPaymentInterval);
 
-  } catch (err) {
-    console.error("Order Error:", err);
-    showToast("❌ Connection Failed. Check Console.");
-  } finally {
-    // 7. Reset Button State
-    payBtn.disabled = false;
-    payBtn.textContent = originalText;
-    payBtn.classList.remove("opacity-50", "cursor-not-allowed");
-  }
-});
+    let attempts = 0;
+    // ឆែករៀងរាល់ 3 វិនាទីម្តង
+    checkPaymentInterval = setInterval(async () => {
+        attempts++;
+        
+        // បើឆែកយូរពេក (ឧទាហរណ៍ 2 នាទី) ឈប់ឆែក
+        if (attempts > 40) {
+            clearInterval(checkPaymentInterval);
+            showToast("ការបង់ប្រាក់អស់ពេលកំណត់ ⚠️");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/check-payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ md5, orderId })
+            });
+            const result = await res.json();
+
+            // បើបង់ជោគជ័យ!
+            if (result.success) {
+                clearInterval(checkPaymentInterval); // ឈប់ឆែក
+                closePaymentModal(); // បិទ Modal
+                
+                // សម្អាត Cart
+                cart = {};
+                saveCart();
+                renderCartBadge();
+                
+                // បង្ហាញសារជោគជ័យ
+                showToast("បង់ប្រាក់ជោគជ័យ! អរគុណ ✅");
+                
+                // បញ្ជូនទៅទំព័រ Success ឬ Reset form
+                setTimeout(() => {
+                   window.location.reload(); // ឬបិទ Mini App
+                }, 2000);
+            }
+        } catch (err) {
+            console.log("Checking payment error...", err);
+        }
+    }, 3000); // 3000ms = 3 seconds
+}
+
+// មុខងារបិទ Modal
+function closePaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    
+    // ឈប់ឆែកការបង់ប្រាក់ពេលបិទផ្ទាំង
+    if (checkPaymentInterval) clearInterval(checkPaymentInterval);
+}
+
+// Event Listener សម្រាប់ប៊ូតុងបិទ
+document.getElementById('closePaymentBtn').addEventListener('click', closePaymentModal);
 
 
 // Map
