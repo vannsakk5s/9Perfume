@@ -904,88 +904,86 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 // ក្នុង script.js
 
 function showPaymentModal(qrString, md5, orderId, amount) {
-  const modal = document.getElementById('paymentModal');
-  const totalEl = document.getElementById('paymentTotal');
-  const orderIdEl = document.getElementById('paymentOrderId');
+    const modal = document.getElementById('paymentModal');
+    const totalEl = document.getElementById('paymentTotal');
+    
+    // ១. បង្ហាញ Modal ជាមុនសិន (ដើម្បីឱ្យ Canvas មានទំហំ)
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
 
-  // ១. បង្ហាញ Modal ជាមុន
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
+    // ២. បង្ហាញតម្លៃ
+    totalEl.textContent = `$${amount}`;
+    
+    // ៣. បង្កើត QR Code រូបភាព
+    // ដាក់ក្នុង try-catch ដើម្បីកុំឱ្យ Error ធ្វើឱ្យគាំងកម្មវិធី
+    try {
+        new QRious({
+            element: document.getElementById('qrCanvas'),
+            value: qrString,
+            size: 250,
+            level: 'H'
+        });
+    } catch (e) {
+        console.error("QR Error:", e);
+        alert("មិនអាចបង្កើត QR Code បានទេ។ សូមពិនិត្យមើល Internet។");
+    }
 
-  // ២. បំពេញទិន្នន័យ
-  totalEl.textContent = `$${amount}`;
-  // បង្ហាញ Order ID ៦ ខ្ទង់ចុងក្រោយ
-  if (orderIdEl) orderIdEl.textContent = `Order ID: #${orderId.toString().slice(-6).toUpperCase()}`;
-
-  // ៣. បង្កើត QR Code
-  try {
-    new QRious({
-      element: document.getElementById('qrCanvas'),
-      value: qrString,
-      size: 600, // ប្រើ Resolution ខ្ពស់ដើម្បីឱ្យស្កេនស្រួល
-      level: 'H'
-    });
-  } catch (e) {
-    console.error("QR Error:", e);
-    showToast("Error generating QR code ❌");
-  }
-
-  // ៤. ចាប់ផ្តើមឆែកការបង់ប្រាក់
-  startCheckingPayment(md5, orderId);
+    // ៤. ចាប់ផ្តើមឆែកមើលការបង់ប្រាក់
+    startCheckingPayment(md5, orderId);
 }
 
 function startCheckingPayment(md5, orderId) {
-  // ១. បញ្ឈប់ការឆែកចាស់
-  if (checkPaymentInterval) clearInterval(checkPaymentInterval);
-
-  // ២. ប្រាកដថាមាន MD5 ទើបដំណើរការ
-  if (!md5) {
-    console.error("Missing MD5 hash for payment verification");
-    return;
-  }
-
-  let attempts = 0;
-  checkPaymentInterval = setInterval(async () => {
-    attempts++;
-
-    if (attempts > 30) { // ៣០ ដង x ៣ វិនាទី = ១ នាទី ៣០ វិនាទី
-      clearInterval(checkPaymentInterval);
-      showToast("ការបង់ប្រាក់អស់ពេលកំណត់ (Timeout) ⚠️");
-      return;
+    // ១. បញ្ឈប់ការឆែកចាស់
+    if (checkPaymentInterval) clearInterval(checkPaymentInterval);
+    
+    // ២. ប្រាកដថាមាន MD5 ទើបដំណើរការ
+    if (!md5) {
+        console.error("Missing MD5 hash for payment verification");
+        return;
     }
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/check-payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ md5, orderId })
-      });
+    let attempts = 0;
+    checkPaymentInterval = setInterval(async () => {
+        attempts++;
 
-      // ប្រសិនបើ Server ងាប់ ឬ Error (មិនមែន JSON)
-      if (!res.ok) throw new Error("Server response not OK");
+        if (attempts > 30) { // ៣០ ដង x ៣ វិនាទី = ១ នាទី ៣០ វិនាទី
+            clearInterval(checkPaymentInterval);
+            showToast("ការបង់ប្រាក់អស់ពេលកំណត់ (Timeout) ⚠️");
+            return;
+        }
 
-      const result = await res.json();
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/check-payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ md5, orderId })
+            });
 
-      if (result.success) {
-        clearInterval(checkPaymentInterval);
-        closePaymentModal();
+            // ប្រសិនបើ Server ងាប់ ឬ Error (មិនមែន JSON)
+            if (!res.ok) throw new Error("Server response not OK");
 
-        cart = {};
-        saveCart();
-        renderCartBadge();
-        renderCart();
+            const result = await res.json();
 
-        showToast("បង់ប្រាក់ជោគជ័យ! (Payment Successful) ✅");
-        document.getElementById("checkoutForm").reset();
+            if (result.success) {
+                clearInterval(checkPaymentInterval);
+                closePaymentModal();
 
-        // ជម្រើសបន្ថែម៖ បញ្ជូនទៅកាន់ទំព័រផ្សេងក្រោយជោគជ័យ
-        // setTimeout(() => window.location.href = "/success.html", 1500);
-      }
-    } catch (err) {
-      // កុំដាក់ showToast ក្នុង catch នេះ ព្រោះវាលោតរំខានរាល់ ៣ វិនាទីពេល Internet ដាច់
-      console.log("Polling payment status...");
-    }
-  }, 3000);
+                cart = {};
+                saveCart();
+                renderCartBadge();
+                renderCart();
+
+                showToast("បង់ប្រាក់ជោគជ័យ! (Payment Successful) ✅");
+                document.getElementById("checkoutForm").reset();
+                
+                // ជម្រើសបន្ថែម៖ បញ្ជូនទៅកាន់ទំព័រផ្សេងក្រោយជោគជ័យ
+                // setTimeout(() => window.location.href = "/success.html", 1500);
+            }
+        } catch (err) {
+            // កុំដាក់ showToast ក្នុង catch នេះ ព្រោះវាលោតរំខានរាល់ ៣ វិនាទីពេល Internet ដាច់
+            console.log("Polling payment status..."); 
+        }
+    }, 3000);
 }
 
 // មុខងារបិទ Modal
