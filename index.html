@@ -475,23 +475,50 @@
 
   <!-- payment -->
   <div id="paymentModal"
-    class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    class="fixed inset-0 z-[200] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
     <div
-      class="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-slate-900 border dark:border-slate-700">
-      <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Scan to Pay</h3>
-      <p class="text-sm text-slate-500 mb-4">Total: <span id="paymentTotal" class="font-bold text-red-600">$0.00</span>
-      </p>
+      class="w-full max-w-[360px] rounded-[2rem] bg-white shadow-2xl overflow-hidden dark:bg-slate-900 border dark:border-slate-800">
 
-      <div class="flex justify-center bg-white p-2 rounded-xl border-2 border-slate-100 mb-4">
-        <canvas id="qrCanvas"></canvas>
+      <div class="bg-[#E1251B] p-5 text-center text-white">
+        <h3 class="text-lg font-bold tracking-wide">Scan to Pay (KHQR)</h3>
+        <p class="text-[10px] opacity-90 uppercase tracking-widest mt-1">Bakong • ABA • All Banks</p>
       </div>
 
-      <p class="text-xs text-slate-400 animate-pulse mb-4">កំពុងរង់ចាំការបង់ប្រាក់... (Checking Payment)</p>
+      <div class="p-6 text-center">
+        <div class="mb-4">
+          <h4 class="text-xl font-bold text-slate-800 dark:text-white">9Perfume Shop</h4>
+          <p id="paymentOrderId" class="text-[11px] text-slate-500 uppercase mt-1">Order: #000000</p>
+        </div>
 
-      <button id="closePaymentBtn"
-        class="w-full rounded-xl bg-slate-200 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-300">
-        បិទ (Close)
-      </button>
+        <div
+          class="relative mx-auto w-60 h-60 bg-white p-3 rounded-2xl border-2 border-slate-100 shadow-inner flex items-center justify-center">
+          <canvas id="qrCanvas" style="width: 100% !important; height: 100% !important;"></canvas>
+
+          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div class="bg-white p-1 rounded-lg shadow-md border border-slate-50">
+              <img src="https://bakong.nbc.gov.kh/images/logo.svg" class="w-8 h-8" alt="Bakong">
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-5 mb-6">
+          <p class="text-sm text-slate-500 font-medium">Total Amount</p>
+          <h2 id="paymentTotal" class="text-4xl font-black text-slate-900 dark:text-white mt-1">$0.00</h2>
+        </div>
+
+        <div class="flex items-center justify-center gap-2 py-3 px-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mb-6">
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+          </span>
+          <p class="text-xs font-semibold text-slate-600 dark:text-slate-300">Waiting for your payment...</p>
+        </div>
+
+        <button id="closePaymentBtn"
+          class="w-full py-4 rounded-2xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors dark:bg-slate-800 dark:text-slate-400">
+          Cancel / Close
+        </button>
+      </div>
     </div>
   </div>
 
