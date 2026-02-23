@@ -943,7 +943,7 @@ function startCheckingPayment(md5, orderId) {
 
     try {
       // សួរទៅ Backend
-      const res = await fetch(`${API_BASE_URL}/check-payment`, {
+      const res = await fetch(`${API_BASE_URL}/api/check-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ md5, orderId })
