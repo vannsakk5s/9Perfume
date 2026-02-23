@@ -596,7 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
 //     // 3. Step 2: Show Bakong Modal & Render QR
 //     $("#bakongModal").classList.remove("hidden");
 //     $("#bakongModal").classList.add("flex");
-    
+
 //     // Generate QR Image using QRious (ensure library is loaded)
 //     new QRious({
 //       element: document.getElementById('bakongQRCanvas'),
@@ -614,7 +614,7 @@ document.addEventListener("DOMContentLoaded", () => {
 //       if (statusData.responseCode === 0) { // Success from Bakong API
 //         clearInterval(window.bakongInterval);
 //         showToast("ការបង់ប្រាក់ជោគជ័យ! ✅");
-        
+
 //         // Finalize order in your system
 //         finalizeOrder(orderData);
 //       }
@@ -725,7 +725,7 @@ document.addEventListener("DOMContentLoaded", () => {
 //         // responseCode: 0 មានន័យថាអតិថិជនបង់លុយរួចរាល់
 //         if (statusData.responseCode === 0) {
 //           clearInterval(window.bakongInterval);
-          
+
 //           // បន្ទាប់ពីបង់លុយរួច យើងផ្ញើទិន្នន័យទៅរក្សាទុកក្នុង Database (Order)
 //           await fetch(`${API_BASE}/api/place-order`, {
 //             method: 'POST',
@@ -806,7 +806,7 @@ document.addEventListener("DOMContentLoaded", () => {
 //       saveCart();
 //       promo.codeApplied = false;
 //       savePromo();
-      
+
 //       // Update UI
 //       renderCartBadge();
 //       renderCart();
@@ -827,133 +827,160 @@ document.addEventListener("DOMContentLoaded", () => {
 //   }
 // });
 
+// ... (កូដផ្សេងៗនៅដដែល) ...
 
-const API_BASE_URL = "https://arabic-farm-casa-marine.trycloudflare.com/api"; 
+// URL របស់ Server (ត្រូវប្រាកដថាត្រឹមត្រូវ)
+const API_BASE_URL = "https://arabic-farm-casa-marine.trycloudflare.com/api";
 let checkPaymentInterval = null;
 
+// ==========================================
+// HANDLE CHECKOUT SUBMISSION
+// ==========================================
 $("#checkoutForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const payBtn = $("#payBtn");
-    
-    // ... (កូដ validate phone/address របស់អ្នកនៅដដែល) ...
+  e.preventDefault();
+  const payBtn = $("#payBtn");
 
-    // 1. Loading State
-    payBtn.disabled = true;
-    payBtn.textContent = "កំពុងបង្កើត QR Code...";
+  // Validate Inputs
+  const phone = $("#phone").value.trim();
+  const address = $("#address").value.trim();
+  if (!phone || !address) {
+    showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
+    return;
+  }
 
-    // ទិន្នន័យ Order
-    const orderData = {
-        // ... (ទិន្នន័យដដែលរបស់អ្នក: phone, address, items...)
-        total: total().toFixed(2),
-        // ...
-    };
+  // 1. Loading State
+  payBtn.disabled = true;
+  payBtn.textContent = "Generating QR...";
+  payBtn.classList.add("opacity-50");
 
-    try {
-        // 2. ហៅ API place-order
-        const res = await fetch(`${API_BASE_URL}/place-order`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-        });
-        const data = await res.json();
+  // ទិន្នន័យ Order
+  const orderData = {
+    telegramId: window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || "WEB_USER",
+    firstName: window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || "Guest",
+    phone: phone,
+    address: address,
+    note: $("#note")?.value || "",
+    items: Object.entries(cart).map(([id, qty]) => {
+      const p = PRODUCTS.find(x => x.id === id);
+      return p ? { id, name: p.name, price: p.price, qty } : null;
+    }).filter(Boolean),
+    total: total().toFixed(2),
+    location: currentCoords
+  };
 
-        if (data.success && data.payment) {
-            // 3. បិទផ្ទាំង Checkout ហើយបើកផ្ទាំង Payment QR
-            closeCheckout();
-            showPaymentModal(data.payment.qrString, data.payment.md5, data.orderId, data.payment.amount);
-        } else {
-            showToast("មានបញ្ហាក្នុងការបង្កើតការកុម្ម៉ង់ ❌");
-        }
+  try {
+    // 2. ហៅ API place-order
+    const res = await fetch(`${API_BASE_URL}/place-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
+    const data = await res.json();
 
-    } catch (err) {
-        console.error(err);
-        showToast("Error connection ❌");
-    } finally {
-        payBtn.disabled = false;
-        payBtn.textContent = "Pay";
+    if (data.success && data.payment) {
+      // 3. ជោគជ័យ: បិទ Checkout ហើយបើក QR Modal
+      closeCheckout();
+
+      // ហៅមុខងារបង្ហាញ QR និងចាប់ផ្តើមឆែកការបង់ប្រាក់
+      showPaymentModal(data.payment.qrString, data.payment.md5, data.orderId, data.payment.amount);
+    } else {
+      showToast("បរាជ័យក្នុងការបង្កើតការកុម្ម៉ង់ ❌");
     }
+
+  } catch (err) {
+    console.error(err);
+    showToast("Connection Error ❌");
+  } finally {
+    payBtn.disabled = false;
+    payBtn.textContent = "Pay";
+    payBtn.classList.remove("opacity-50");
+  }
 });
 
-// --- មុខងារបង្ហាញ QR និងឆែកការបង់ប្រាក់ ---
+// ==========================================
+// QR & PAYMENT CHECKING LOGIC
+// ==========================================
+
 function showPaymentModal(qrString, md5, orderId, amount) {
-    const modal = document.getElementById('paymentModal');
-    const totalEl = document.getElementById('paymentTotal');
-    
-    // បង្ហាញតម្លៃ
-    totalEl.textContent = `$${amount}`;
-    
-    // បង្កើត QR Code រូបភាព
-    new QRious({
-        element: document.getElementById('qrCanvas'),
-        value: qrString,
-        size: 200,
-        level: 'H'
-    });
+  const modal = document.getElementById('paymentModal');
+  const totalEl = document.getElementById('paymentTotal');
 
-    // បង្ហាញ Modal
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+  // បង្ហាញតម្លៃ
+  totalEl.textContent = `$${amount}`;
 
-    // **ចាប់ផ្តើមឆែកមើលថាគេបង់លុយហើយឬនៅ (Polling)**
-    startCheckingPayment(md5, orderId);
+  // បង្កើត QR Code រូបភាព (ប្រើ QRious Library)
+  new QRious({
+    element: document.getElementById('qrCanvas'),
+    value: qrString,
+    size: 250, // ទំហំ QR
+    level: 'H'
+  });
+
+  // បង្ហាញ Modal
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  // **ចាប់ផ្តើមឆែកមើលថាគេបង់លុយហើយឬនៅ (Polling)**
+  startCheckingPayment(md5, orderId);
 }
 
 function startCheckingPayment(md5, orderId) {
-    // ឈប់ឆែករបស់ចាស់សិន (បើមាន)
-    if (checkPaymentInterval) clearInterval(checkPaymentInterval);
+  // ឈប់ឆែករបស់ចាស់សិន (បើមាន)
+  if (checkPaymentInterval) clearInterval(checkPaymentInterval);
 
-    let attempts = 0;
-    // ឆែករៀងរាល់ 3 វិនាទីម្តង
-    checkPaymentInterval = setInterval(async () => {
-        attempts++;
-        
-        // បើឆែកយូរពេក (ឧទាហរណ៍ 2 នាទី) ឈប់ឆែក
-        if (attempts > 40) {
-            clearInterval(checkPaymentInterval);
-            showToast("ការបង់ប្រាក់អស់ពេលកំណត់ ⚠️");
-            return;
-        }
+  let attempts = 0;
 
-        try {
-            const res = await fetch(`${API_BASE_URL}/check-payment`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ md5, orderId })
-            });
-            const result = await res.json();
+  // ឆែករៀងរាល់ 3 វិនាទីម្តង
+  checkPaymentInterval = setInterval(async () => {
+    attempts++;
 
-            // បើបង់ជោគជ័យ!
-            if (result.success) {
-                clearInterval(checkPaymentInterval); // ឈប់ឆែក
-                closePaymentModal(); // បិទ Modal
-                
-                // សម្អាត Cart
-                cart = {};
-                saveCart();
-                renderCartBadge();
-                
-                // បង្ហាញសារជោគជ័យ
-                showToast("បង់ប្រាក់ជោគជ័យ! អរគុណ ✅");
-                
-                // បញ្ជូនទៅទំព័រ Success ឬ Reset form
-                setTimeout(() => {
-                   window.location.reload(); // ឬបិទ Mini App
-                }, 2000);
-            }
-        } catch (err) {
-            console.log("Checking payment error...", err);
-        }
-    }, 3000); // 3000ms = 3 seconds
+    // បើឆែកយូរពេក (ឧទាហរណ៍ 60 វិនាទី) ឈប់ឆែក
+    if (attempts > 20) {
+      clearInterval(checkPaymentInterval);
+      showToast("ការបង់ប្រាក់អស់ពេលកំណត់ (Timeout) ⚠️");
+      return;
+    }
+
+    try {
+      // សួរទៅ Backend
+      const res = await fetch(`${API_BASE_URL}/check-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ md5, orderId })
+      });
+      const result = await res.json();
+
+      // បើបង់ជោគជ័យ!
+      if (result.success) {
+        clearInterval(checkPaymentInterval); // ឈប់ឆែក
+        closePaymentModal(); // បិទ Modal
+
+        // សម្អាត Cart
+        cart = {};
+        saveCart();
+        renderCartBadge();
+        renderCart();
+
+        // បង្ហាញសារជោគជ័យ
+        showToast("បង់ប្រាក់ជោគជ័យ! (Payment Successful) ✅");
+
+        // Reset Form
+        document.getElementById("checkoutForm").reset();
+      }
+    } catch (err) {
+      console.log("Checking payment error...", err);
+    }
+  }, 3000); // 3000ms = 3 seconds
 }
 
 // មុខងារបិទ Modal
 function closePaymentModal() {
-    const modal = document.getElementById('paymentModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    
-    // ឈប់ឆែកការបង់ប្រាក់ពេលបិទផ្ទាំង
-    if (checkPaymentInterval) clearInterval(checkPaymentInterval);
+  const modal = document.getElementById('paymentModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+
+  // ឈប់ឆែកការបង់ប្រាក់ពេលបិទផ្ទាំង
+  if (checkPaymentInterval) clearInterval(checkPaymentInterval);
 }
 
 // Event Listener សម្រាប់ប៊ូតុងបិទ
