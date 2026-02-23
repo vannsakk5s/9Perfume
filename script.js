@@ -870,7 +870,7 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 
   try {
     // 2. ហៅ API place-order
-    const res = await fetch(`${API_BASE_URL}/place-order`, {
+    const res = await fetch(`${API_BASE_URL}/api/place-order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData)
