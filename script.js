@@ -830,7 +830,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // ... (កូដផ្សេងៗនៅដដែល) ...
 
 // URL របស់ Server (ត្រូវប្រាកដថាត្រឹមត្រូវ)
-const API_BASE_URL = "https://arabic-farm-casa-marine.trycloudflare.com/api";
+const API_BASE_URL = "https://tmp-mardi-charming-qualifying.trycloudflare.com";
 let checkPaymentInterval = null;
 
 // ==========================================
