@@ -906,29 +906,33 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 function showPaymentModal(qrString, md5, orderId, amount) {
     const modal = document.getElementById('paymentModal');
     const totalEl = document.getElementById('paymentTotal');
-    
-    // ១. បង្ហាញ Modal ជាមុនសិន (ដើម្បីឱ្យ Canvas មានទំហំ)
+    const orderIdEl = document.getElementById('paymentOrderId'); // បន្ថែមសម្រាប់បង្ហាញលេខវិក្កយបត្រ
+
+    // ១. បង្ហាញ Modal ជាមុនសិន
     modal.classList.remove('hidden');
     modal.classList.add('flex');
 
-    // ២. បង្ហាញតម្លៃ
-    totalEl.textContent = `$${amount}`;
+    // ២. បំពេញទិន្នន័យទឹកប្រាក់ និងលេខសម្គាល់
+    totalEl.textContent = `$${parseFloat(amount).toFixed(2)}`;
+    if (orderIdEl) orderIdEl.textContent = `Order ID: #${orderId.toString().slice(-6).toUpperCase()}`;
     
     // ៣. បង្កើត QR Code រូបភាព
-    // ដាក់ក្នុង try-catch ដើម្បីកុំឱ្យ Error ធ្វើឱ្យគាំងកម្មវិធី
     try {
         new QRious({
             element: document.getElementById('qrCanvas'),
             value: qrString,
-            size: 250,
-            level: 'H'
+            size: 600,       // កម្រិតច្បាស់ខ្ពស់សម្រាប់កាមេរ៉ាស្កេន
+            level: 'H',      // Error Correction ខ្ពស់បំផុត (ជួយឱ្យស្កេនបានទោះជារូបភាពបែកខ្លះ)
+            padding: 20,     // បន្ថែមគម្លាតសជុំវិញ ដើម្បីឱ្យ App ធនាគារសម្គាល់ចំណុចខ្មៅបានច្បាស់
+            background: '#ffffff',
+            foreground: '#000000'
         });
     } catch (e) {
         console.error("QR Error:", e);
-        alert("មិនអាចបង្កើត QR Code បានទេ។ សូមពិនិត្យមើល Internet។");
+        showToast("Error generating QR code ❌");
     }
 
-    // ៤. ចាប់ផ្តើមឆែកមើលការបង់ប្រាក់
+    // ៤. ចាប់ផ្តើមឆែកមើលការបង់ប្រាក់រៀងរាល់ ៣ វិនាទី
     startCheckingPayment(md5, orderId);
 }
 
