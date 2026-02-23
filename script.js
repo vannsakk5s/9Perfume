@@ -901,27 +901,35 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
 // QR & PAYMENT CHECKING LOGIC
 // ==========================================
 
+// ក្នុង script.js
+
 function showPaymentModal(qrString, md5, orderId, amount) {
-  const modal = document.getElementById('paymentModal');
-  const totalEl = document.getElementById('paymentTotal');
+    const modal = document.getElementById('paymentModal');
+    const totalEl = document.getElementById('paymentTotal');
+    
+    // ១. បង្ហាញ Modal ជាមុនសិន (ដើម្បីឱ្យ Canvas មានទំហំ)
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
 
-  // បង្ហាញតម្លៃ
-  totalEl.textContent = `$${amount}`;
+    // ២. បង្ហាញតម្លៃ
+    totalEl.textContent = `$${amount}`;
+    
+    // ៣. បង្កើត QR Code រូបភាព
+    // ដាក់ក្នុង try-catch ដើម្បីកុំឱ្យ Error ធ្វើឱ្យគាំងកម្មវិធី
+    try {
+        new QRious({
+            element: document.getElementById('qrCanvas'),
+            value: qrString,
+            size: 250,
+            level: 'H'
+        });
+    } catch (e) {
+        console.error("QR Error:", e);
+        alert("មិនអាចបង្កើត QR Code បានទេ។ សូមពិនិត្យមើល Internet។");
+    }
 
-  // បង្កើត QR Code រូបភាព (ប្រើ QRious Library)
-  new QRious({
-    element: document.getElementById('qrCanvas'),
-    value: qrString,
-    size: 250, // ទំហំ QR
-    level: 'H'
-  });
-
-  // បង្ហាញ Modal
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
-
-  // **ចាប់ផ្តើមឆែកមើលថាគេបង់លុយហើយឬនៅ (Polling)**
-  startCheckingPayment(md5, orderId);
+    // ៤. ចាប់ផ្តើមឆែកមើលការបង់ប្រាក់
+    startCheckingPayment(md5, orderId);
 }
 
 function startCheckingPayment(md5, orderId) {
