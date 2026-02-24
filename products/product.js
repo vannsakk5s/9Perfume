@@ -676,7 +676,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // });
 
 // URL របស់ Server (ត្រូវប្រាកដថាត្រឹមត្រូវ)
-const API_BASE_URL = "https://tmp-mardi-charming-qualifying.trycloudflare.com";
+const API_BASE_URL = "https://todd-placing-demonstration-crafts.trycloudflare.com";
 let checkPaymentInterval = null;
 
 // ==========================================
