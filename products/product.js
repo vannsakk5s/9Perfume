@@ -86,9 +86,9 @@ document.addEventListener('DOMContentLoaded', updateActiveNav);
 
 // ---------- Data product ----------
 const PRODUCTS = [
-  { id: "p1", image: "/images/9pm.png", name: "9 Pm Rebel", brand: "AFNAN", price: 0.01, size: "50ml", notes: ["amber", "vanilla", "musk"], vibe: "Warm • Smooth", featured: 1, des: "" },
-  { id: "p2", image: "/images/2.jpg", name: "Rose Velvet", brand: "Maison Bloom", price: 54, size: "50ml", notes: ["rose", "peony", "powder"], vibe: "Soft • Romantic", featured: 2, des: "A soft and romantic rose scent with peony and powder notes." },
-  { id: "p3", image: "/images/1.jpg", name: "Citrus Dawn", brand: "Atelier Fresh", price: 42, size: "30ml", notes: ["citrus", "bergamot", "tea"], vibe: "Bright • Clean", featured: 3, des: "A bright and clean citrus scent with bergamot and tea notes." },
+  { id: "p1", image: "/images/9pmRebel.png", name: "9 Pm Rebel", brand: "AFNAN", price: 0.01, size: "50ml", notes: ["amber", "vanilla", "musk"], vibe: "Warm • Smooth", featured: 1, des: "" },
+  { id: "p2", image: "/images/9pm.png", name: "9pm", brand: "AFNAN", price: 0.01, size: "100ml", notes: ["rose", "peony", "powder"], vibe: "Soft • Romantic", featured: 2, des: "A soft and romantic rose scent with peony and powder notes." },
+  { id: "p3", image: "/images/strg.png", name: "Strong Girl with you", brand: "Armani Beauty", price: 0.01, size: "50ml", notes: ["citrus", "bergamot", "tea"], vibe: "Bright • Clean", featured: 3, des: "A bright and clean citrus scent with bergamot and tea notes." },
   { id: "p4", image: "/images/2.jpg", name: "Oud Night", brand: "Desert Noir", price: 89, size: "60ml", notes: ["oud", "spice", "smoke"], vibe: "Bold • Luxe", featured: 4, des: "A bold and luxurious oud scent with spice and smoke notes." },
   { id: "p5", image: "/images/1.jpg", name: "Jasmine Breeze", brand: "ScentHouse", price: 59, size: "50ml", notes: ["jasmine", "green tea", "musk"], vibe: "Fresh • Elegant", featured: 5, des: "A fresh and elegant jasmine scent with green tea and musk notes." },
   { id: "p6", image: "/images/2.jpg", name: "Leather & Smoke", brand: "Maison Bloom", price: 75, size: "50ml", notes: ["leather", "smoke", "wood"], vibe: "Rugged • Mysterious", featured: 6, des: "A rugged and mysterious leather scent with smoke and wood notes." },
