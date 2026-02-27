@@ -830,7 +830,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // ... (កូដផ្សេងៗនៅដដែល) ...
 
 // URL របស់ Server (ត្រូវប្រាកដថាត្រឹមត្រូវ)
-const API_BASE_URL = "https://refrigerator-cast-notified-speaking.trycloudflare.com";
+const API_BASE_URL = "https://hop-tba-growing-solution.trycloudflare.com";
 let checkPaymentInterval = null;
 
 // ==========================================
