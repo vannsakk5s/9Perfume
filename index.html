@@ -475,37 +475,65 @@
 
   <!-- payment -->
   <div id="paymentModal"
-    class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div
-      class="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-slate-900 border dark:border-slate-700">
-      <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Scan to Pay</h3>
-      <p class="text-sm text-slate-500 mb-4">Total: <span id="paymentTotal" class="font-bold text-red-600">$0.00</span>
-      </p>
+  class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <div
+    class="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-slate-900 border dark:border-slate-700">
 
+    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Scan to Pay</h3>
+    <p class="text-sm text-slate-500 mb-4">
+      Total: <span id="paymentTotal" class="font-bold text-red-600">$0.00</span>
+    </p>
+
+    <!-- WAITING VIEW -->
+    <div id="paymentWaiting">
       <div class="flex justify-center items-center bg-white p-2 rounded-xl border-2 border-slate-100 mb-4">
         <canvas id="qrCanvas"></canvas>
       </div>
 
-      <p class="text-xs text-slate-400 animate-pulse mb-4">កំពុងរង់ចាំការបង់ប្រាក់... (Checking Payment)</p>
+      <p class="text-xs text-slate-400 animate-pulse mb-4">
+        កំពុងរង់ចាំការបង់ប្រាក់... (Checking Payment)
+      </p>
+    </div>
 
-      <div class="flex justify-center items-center gap-2">
-        <button id="saveQRBtn"
-          class="rounded-xl bg-blue-600 py-3 px-3 text-sm font-semibold text-white hover:bg-blue-700 flex items-center justify-center gap-2">
-          <svg class="brightness-0 invert dark:invert-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256">
-            <path
-              d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z">
-            </path>
-          </svg>
-        </button>
-
-        <button id="closePaymentBtn"
-          class="w-full rounded-xl bg-slate-200 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-300">
-          Close
-        </button>
+    <!-- SUCCESS VIEW -->
+    <div id="paymentSuccess" class="hidden text-center">
+      <div class="flex justify-center mb-3">
+        <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" stroke-width="2"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+          <circle cx="12" cy="12" r="10" />
+        </svg>
       </div>
 
+      <h3 class="text-lg font-bold text-green-600 mb-1">Payment Successful</h3>
+      <p class="text-sm text-slate-500 mb-4">សូមអរគុណចំពោះការបង់ប្រាក់ 🙏</p>
+
+      <button id="donePaymentBtn"
+        class="w-full rounded-xl bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700">
+        Done
+      </button>
     </div>
+
+    <div class="flex justify-center items-center gap-2">
+      <button id="saveQRBtn"
+        class="rounded-xl bg-blue-600 py-3 px-3 text-sm font-semibold text-white hover:bg-blue-700 flex items-center justify-center gap-2"
+        title="Save QR">
+        <svg class="brightness-0 invert dark:invert-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+          fill="#000000" viewBox="0 0 256 256">
+          <path
+            d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z">
+          </path>
+        </svg>
+      </button>
+
+      <button id="closePaymentBtn"
+        class="w-full rounded-xl bg-slate-200 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-300">
+        Close
+      </button>
+    </div>
+
   </div>
+</div>
 
   <!-- Toast -->
   <div id="toast" class="pointer-events-none fixed bottom-4 right-4 z-[60] hidden max-w-sm rounded-2xl border bg-white px-4 py-3 shadow-lg

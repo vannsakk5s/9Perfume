@@ -830,179 +830,162 @@ document.addEventListener("DOMContentLoaded", () => {
 // ... (កូដផ្សេងៗនៅដដែល) ...
 
 // URL របស់ Server (ត្រូវប្រាកដថាត្រឹមត្រូវ)
-const API_BASE_URL = "https://hop-tba-growing-solution.trycloudflare.com";
+// URL របស់ Server (ត្រូវប្រាកដថាត្រឹមត្រូវ)
+const API_BASE_URL = "https://aviation-prostate-lighter-api.trycloudflare.com";
 let checkPaymentInterval = null;
 
-// ==========================================
-// HANDLE CHECKOUT SUBMISSION
-// ==========================================
-$("#checkoutForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const payBtn = $("#payBtn");
+// ===============================
+// PAYMENT MODAL UI HELPERS
+// ===============================
+function resetPaymentModalUI() {
+  const waiting = document.getElementById("paymentWaiting");
+  const success = document.getElementById("paymentSuccess");
+  if (waiting) waiting.classList.remove("hidden");
+  if (success) success.classList.add("hidden");
+}
 
-  // Validate Inputs
-  const phone = $("#phone").value.trim();
-  const address = $("#address").value.trim();
-  if (!phone || !address) {
-    showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
-    return;
-  }
+function showPaymentSuccessUI() {
+  const waiting = document.getElementById("paymentWaiting");
+  const success = document.getElementById("paymentSuccess");
 
-  // 1. Loading State
-  payBtn.disabled = true;
-  payBtn.textContent = "Generating QR...";
-  payBtn.classList.add("opacity-50");
+  if (waiting) waiting.classList.add("hidden");
+  if (success) success.classList.remove("hidden");
 
-  // ទិន្នន័យ Order
-  const orderData = {
-    telegramId: window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || "WEB_USER",
-    firstName: window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || "Guest",
-    phone: phone,
-    address: address,
-    note: $("#note")?.value || "",
-    items: Object.entries(cart).map(([id, qty]) => {
-      const p = PRODUCTS.find(x => x.id === id);
-      return p ? { id, name: p.name, price: p.price, qty } : null;
-    }).filter(Boolean),
-    total: total().toFixed(2),
-    location: currentCoords
-  };
+  // Auto close after 2.5s
+  setTimeout(() => {
+    closePaymentModal();
+  }, 2500);
+}
 
-  try {
-    // 2. ហៅ API place-order
-    const res = await fetch(`${API_BASE_URL}/api/place-order`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    });
-    const data = await res.json();
-
-    if (data.success && data.payment) {
-      // 3. ជោគជ័យ: បិទ Checkout ហើយបើក QR Modal
-      closeCheckout();
-
-      // ហៅមុខងារបង្ហាញ QR និងចាប់ផ្តើមឆែកការបង់ប្រាក់
-      showPaymentModal(data.payment.qrString, data.payment.md5, data.orderId, data.payment.amount);
-    } else {
-      showToast("បរាជ័យក្នុងការបង្កើតការកុម្ម៉ង់ ❌");
-    }
-
-  } catch (err) {
-    console.error(err);
-    showToast("Connection Error ❌");
-  } finally {
-    payBtn.disabled = false;
-    payBtn.textContent = "Pay";
-    payBtn.classList.remove("opacity-50");
-  }
-});
-
-// ==========================================
-// QR & PAYMENT CHECKING LOGIC
-// ==========================================
-
-// ក្នុង script.js
-
+// ===============================
+// SHOW PAYMENT MODAL + QR
+// ===============================
 function showPaymentModal(qrString, md5, orderId, amount) {
-  const modal = document.getElementById('paymentModal');
+  const modal = document.getElementById("paymentModal");
 
-  // ១. បង្ហាញ Modal សិនដើម្បីឱ្យ Canvas មានទំហំ
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
+  // Reset UI each time open
+  resetPaymentModalUI();
 
-  document.getElementById('paymentTotal').textContent = `$${parseFloat(amount).toFixed(2)}`;
+  // Show modal first so canvas size is correct
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
 
-  // ២. បង្កើត QR Code ឱ្យច្បាស់ល្អ (High Resolution)
+  document.getElementById("paymentTotal").textContent = `$${parseFloat(amount).toFixed(2)}`;
+
+  // Render QR (High Resolution)
   try {
     new QRious({
-      element: document.getElementById('qrCanvas'),
+      element: document.getElementById("qrCanvas"),
       value: qrString,
-      size: 240,       // បង្កើនកម្រិតច្បាស់ (Resolution)
-      level: 'H',      // Error Correction ខ្ពស់បំផុត (ជួយឱ្យស្កេនស្រួល)
-      padding: 10      // បន្ថែមតំបន់សជុំវិញ (Quiet Zone) ចាំបាច់សម្រាប់ App ធនាគារ
+      size: 240,
+      level: "H",
+      padding: 10
     });
   } catch (e) {
     console.error("QR Rendering Error:", e);
   }
 
+  // Start polling payment
   startCheckingPayment(md5, orderId);
 }
 
+// ===============================
+// PAYMENT POLLING
+// ===============================
 function startCheckingPayment(md5, orderId) {
-  // ១. បញ្ឈប់ការឆែកចាស់
+  // stop old interval
   if (checkPaymentInterval) clearInterval(checkPaymentInterval);
 
-  // ២. ប្រាកដថាមាន MD5 ទើបដំណើរការ
   if (!md5) {
     console.error("Missing MD5 hash for payment verification");
     return;
   }
 
   let attempts = 0;
+
   checkPaymentInterval = setInterval(async () => {
     attempts++;
 
-    if (attempts > 30) { // ៣០ ដង x ៣ វិនាទី = ១ នាទី ៣០ វិនាទី
+    // Timeout after 30 attempts (30 x 3s = 90s)
+    if (attempts > 30) {
       clearInterval(checkPaymentInterval);
+      checkPaymentInterval = null;
       showToast("ការបង់ប្រាក់អស់ពេលកំណត់ (Timeout) ⚠️");
       return;
     }
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/check-payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ md5, orderId })
       });
 
-      // ប្រសិនបើ Server ងាប់ ឬ Error (មិនមែន JSON)
       if (!res.ok) throw new Error("Server response not OK");
 
       const result = await res.json();
 
+      // ✅ SUCCESS
       if (result.success) {
         clearInterval(checkPaymentInterval);
-        closePaymentModal();
+        checkPaymentInterval = null;
 
+        // Show success UI in modal (DON'T close immediately)
+        showPaymentSuccessUI();
+
+        // Clear cart + update UI
         cart = {};
         saveCart();
         renderCartBadge();
         renderCart();
 
-        showToast("បង់ប្រាក់ជោគជ័យ! (Payment Successful) ✅");
+        // Reset form
         document.getElementById("checkoutForm").reset();
 
-        // ជម្រើសបន្ថែម៖ បញ្ជូនទៅកាន់ទំព័រផ្សេងក្រោយជោគជ័យ
-        // setTimeout(() => window.location.href = "/success.html", 1500);
+        // Optional toast (one time)
+        showToast("បង់ប្រាក់ជោគជ័យ! (Payment Successful) ✅");
       }
+
     } catch (err) {
-      // កុំដាក់ showToast ក្នុង catch នេះ ព្រោះវាលោតរំខានរាល់ ៣ វិនាទីពេល Internet ដាច់
+      // no toast here (avoid spam every 3s)
       console.log("Polling payment status...");
     }
   }, 3000);
 }
 
-// មុខងារបិទ Modal
+// ===============================
+// CLOSE PAYMENT MODAL
+// ===============================
 function closePaymentModal() {
-  const modal = document.getElementById('paymentModal');
-  modal.classList.add('hidden');
-  modal.classList.remove('flex');
+  const modal = document.getElementById("paymentModal");
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
 
-  // ឈប់ឆែកការបង់ប្រាក់ពេលបិទផ្ទាំង
-  if (checkPaymentInterval) clearInterval(checkPaymentInterval);
+  // stop polling when close modal
+  if (checkPaymentInterval) {
+    clearInterval(checkPaymentInterval);
+    checkPaymentInterval = null;
+  }
+
+  // reset UI when close
+  resetPaymentModalUI();
 }
 
-// Event Listener សម្រាប់ប៊ូតុងបិទ
-document.getElementById('closePaymentBtn').addEventListener('click', closePaymentModal);
+// ===============================
+// BUTTONS
+// ===============================
+document.getElementById("closePaymentBtn").addEventListener("click", closePaymentModal);
 
-document.getElementById('saveQRBtn').onclick = function() {
-    const canvas = document.getElementById('qrCanvas');
-    // បង្កើត Link បណ្តោះអាសន្ន
-    const link = document.createElement('a');
-    link.download = '9Perfume-Payment-QR.png';
-    // បំប្លែង Canvas ទៅជារូបភាព PNG
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+const doneBtn = document.getElementById("donePaymentBtn");
+if (doneBtn) doneBtn.addEventListener("click", closePaymentModal);
+
+// Save QR
+document.getElementById("saveQRBtn").onclick = function () {
+  const canvas = document.getElementById("qrCanvas");
+  const link = document.createElement("a");
+  link.download = "9Perfume-Payment-QR.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
 };
 
 
