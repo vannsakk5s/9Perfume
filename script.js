@@ -962,30 +962,36 @@ function startCheckingPayment(md5, orderId) {
 
       if (result.success) {
         clearInterval(checkPaymentInterval);
-        closePaymentModal();
+        closePaymentModal(); // បិទផ្ទាំង QR Code
 
+        // សម្អាតទិន្នន័យក្នុងកន្ត្រក
         cart = {};
         saveCart();
         renderCartBadge();
         renderCart();
-
-        // ១. ប្តូរសារ (Toast Message) តាមការចង់បាន
-        showToast("ការបង់ប្រាក់ជោគជ័យ! សូមពិនិត្យមើលវិក្កយបត្រក្នុង Bot របស់អ្នក ✅");
-        
         document.getElementById("checkoutForm").reset();
 
-        // ២. បិទ Telegram Mini App ដោយស្វ័យប្រវត្តិ បន្ទាប់ពី ២.៥ វិនាទី
-        setTimeout(() => {
-          if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.close();
-          }
-        }, 2500); 
+        // បង្ហាញផ្ទាំង Success Popup ជំនួសឱ្យ Toast
+        const successModal = document.getElementById('successModal');
+        successModal.classList.remove('hidden');
+        successModal.classList.add('flex');
       }
     } catch (err) {
       // កុំដាក់ showToast ក្នុង catch នេះ ព្រោះវាលោតរំខានរាល់ ៣ វិនាទីពេល Internet ដាច់
       console.log("Polling payment status...");
     }
   }, 3000);
+}
+
+function closeAppAndModal() {
+  const successModal = document.getElementById('successModal');
+  successModal.classList.add('hidden');
+  successModal.classList.remove('flex');
+  
+  // បិទ Telegram App ដោយស្វ័យប្រវត្តិដើម្បីទៅមើល Chat
+  if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.close();
+  }
 }
 
 // មុខងារបិទ Modal
