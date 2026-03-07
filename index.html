@@ -1,155 +1,213 @@
 <!doctype html>
 <html lang="en" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Mini Perfume Shop</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Hanuman:wght@100;300;400;700;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kantumruy+Pro:ital@1&family=Konkhmer+Sleokchher&family=Koulen&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Playwrite+AU+VIC+Guides&family=Playwrite+CO+Guides&family=Roboto:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Yellowtail&display=swap"
+      rel="stylesheet"
+    />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Mini Perfume Shop</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Hanuman:wght@100;300;400;700;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kantumruy+Pro:ital@1&family=Konkhmer+Sleokchher&family=Koulen&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Playwrite+AU+VIC+Guides&family=Playwrite+CO+Guides&family=Roboto:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Yellowtail&display=swap"
-    rel="stylesheet">
+    <!-- map -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+      #map {
+        height: 300px;
+        width: 100%;
+        border-radius: 15px;
+        margin-top: 10px;
+      }
+    </style>
 
-  <!-- map -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-  <style>
-    #map {
-      height: 300px;
-      width: 100%;
-      border-radius: 15px;
-      margin-top: 10px;
-    }
-  </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: { fontFamily: { sans: ["ui-sans-serif", "system-ui"] } },
+        },
+      };
+    </script>
+  </head>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: { extend: { fontFamily: { sans: ["ui-sans-serif", "system-ui"] } } }
-    }
-  </script>
-</head>
-
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-  <!-- Top Bar -->
-  <header class="sticky top-0 z-30 border-b bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
-    <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
-      <div class="flex mt-20 md:mt-5 items-center gap-3">
-        <div class="h-10 w-10 rounded-2xl bg-slate-900 dark:bg-white"></div>
-        <div>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Mini App</p>
-          <h1 class="text-base font-semibold">9Perfume</h1>
+  <body
+    class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
+  >
+    <!-- Top Bar -->
+    <header
+      class="sticky top-0 z-30 border-b bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80"
+    >
+      <div
+        class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4"
+      >
+        <div class="flex mt-20 md:mt-5 items-center gap-3">
+          <div class="h-10 w-10 rounded-2xl bg-slate-900 dark:bg-white"></div>
+          <div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Mini App</p>
+            <h1 class="text-base font-semibold">9Perfume</h1>
+          </div>
         </div>
-      </div>
 
-      <div class="hidden flex-1 mt-20 md:mt-5 items-center gap-2 md:flex md:justify-center">
-        <div class="relative w-full max-w-xl flex justify-beetween items-center">
-          <input id="searchInput" type="text" placeholder="Search perfumes (e.g., rose, oud, citrus)..."
-            class="w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
-                   bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15" />
-          <!-- <span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-slate-500">⌘K</span> -->
+        <div
+          class="hidden flex-1 mt-20 md:mt-5 items-center gap-2 md:flex md:justify-center"
+        >
           <div
-            class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-slate-500">
-            <svg class="brightness-100 invert dark:invert-0" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-              fill="#FFFFFF" viewBox="0 0 256 256">
-              <path
-                d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z">
-              </path>
-            </svg>
+            class="relative w-full max-w-xl flex justify-beetween items-center"
+          >
+            <input
+              id="searchInput"
+              type="text"
+              placeholder="Search perfumes (e.g., rose, oud, citrus)..."
+              class="w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20 bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+            />
+            <!-- <span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-slate-500">⌘K</span> -->
+            <div
+              class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-slate-500"
+            >
+              <svg
+                class="brightness-100 invert dark:invert-0"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="#FFFFFF"
+                viewBox="0 0 256 256"
+              >
+                <path
+                  d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"
+                ></path>
+              </svg>
+            </div>
           </div>
 
+          <select
+            id="sortSelect"
+            class="rounded-2xl border bg-white px-3 py-3 text-sm outline-none hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800"
+          >
+            <option value="featured">Sort: Featured</option>
+            <option value="price_asc">Price: Low → High</option>
+            <option value="price_desc">Price: High → Low</option>
+            <option value="name_asc">Name: A → Z</option>
+          </select>
         </div>
 
-        <select id="sortSelect" class="rounded-2xl border bg-white px-3 py-3 text-sm outline-none hover:bg-slate-50
-                 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
-          <option value="featured">Sort: Featured</option>
-          <option value="price_asc">Price: Low → High</option>
-          <option value="price_desc">Price: High → Low</option>
-          <option value="name_asc">Name: A → Z</option>
-        </select>
+        <div class="flex mt-20 md:mt-5 items-center gap-2">
+          <button
+            id="themeToggle"
+            class="rounded-2xl border bg-white px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800"
+          >
+            🌙
+          </button>
+
+          <button
+            id="openCartBtn"
+            class="relative rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+          >
+            <svg
+              class="brightness-0 invert dark:invert-0"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              fill="#FFFFFF"
+              viewBox="0 0 256 256"
+            >
+              <path
+                d="M104,216a16,16,0,1,1-16-16A16,16,0,0,1,104,216Zm88-16a16,16,0,1,0,16,16A16,16,0,0,0,192,200ZM239.71,74.14l-25.64,92.28A24.06,24.06,0,0,1,191,184H92.16A24.06,24.06,0,0,1,69,166.42L33.92,40H16a8,8,0,0,1,0-16H40a8,8,0,0,1,7.71,5.86L57.19,64H232a8,8,0,0,1,7.71,10.14ZM221.47,80H61.64l22.81,82.14A8,8,0,0,0,92.16,168H191a8,8,0,0,0,7.71-5.86Z"
+              ></path>
+            </svg>
+            <span
+              id="cartCount"
+              class="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700"
+            >
+              0
+            </span>
+          </button>
+        </div>
       </div>
 
-      <div class="flex mt-20 md:mt-5 items-center gap-2">
-        <button id="themeToggle" class="rounded-2xl border bg-white px-4 py-3 text-sm font-medium hover:bg-slate-50
-                 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
-          🌙
-        </button>
+      <!-- Mobile controls -->
+      <div class="mx-auto max-w-6xl px-4 pb-4 md:hidden">
+        <div class="flex gap-2">
+          <input
+            id="searchInputMobile"
+            type="text"
+            placeholder="Search perfumes..."
+            class="flex-1 rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20 bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+          />
 
-        <button id="openCartBtn"
-          class="relative rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
-
-          <svg class="brightness-0 invert dark:invert-0" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-            fill="#FFFFFF" viewBox="0 0 256 256">
-            <path
-              d="M104,216a16,16,0,1,1-16-16A16,16,0,0,1,104,216Zm88-16a16,16,0,1,0,16,16A16,16,0,0,0,192,200ZM239.71,74.14l-25.64,92.28A24.06,24.06,0,0,1,191,184H92.16A24.06,24.06,0,0,1,69,166.42L33.92,40H16a8,8,0,0,1,0-16H40a8,8,0,0,1,7.71,5.86L57.19,64H232a8,8,0,0,1,7.71,10.14ZM221.47,80H61.64l22.81,82.14A8,8,0,0,0,92.16,168H191a8,8,0,0,0,7.71-5.86Z">
-            </path>
-          </svg>
-          <span id="cartCount" class="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-semibold text-slate-900 border
-                   dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700">
-            0
-          </span>
-        </button>
+          <select
+            id="sortSelectMobile"
+            class="rounded-2xl border bg-white px-3 py-3 text-sm outline-none hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800"
+          >
+            <option value="featured">Featured</option>
+            <option value="price_asc">Price ↑</option>
+            <option value="price_desc">Price ↓</option>
+            <option value="name_asc">A → Z</option>
+          </select>
+        </div>
       </div>
-    </div>
-
-    <!-- Mobile controls -->
-    <div class="mx-auto max-w-6xl px-4 pb-4 md:hidden">
-      <div class="flex gap-2">
-        <input id="searchInputMobile" type="text" placeholder="Search perfumes..."
-          class="flex-1 rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
-                 bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15" />
-
-        <select id="sortSelectMobile" class="rounded-2xl border bg-white px-3 py-3 text-sm outline-none hover:bg-slate-50
-                 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
-          <option value="featured">Featured</option>
-          <option value="price_asc">Price ↑</option>
-          <option value="price_desc">Price ↓</option>
-          <option value="name_asc">A → Z</option>
-        </select>
-      </div>
-    </div>
-    <!-- ipad window -->
-    <nav class="hidden md:flex items-center justify-center gap-10 border-l border-slate-200 dark:border-slate-800 mb-2">
-      <a href="/index.html" class="nav-link">
-        Home
-      </a>
-      <a href="/products/product.html" class="nav-link">
-        Products
-      </a>
-      <!-- <a href="/about/about.html" class="nav-link">
+      <!-- ipad window -->
+      <nav
+        class="hidden md:flex items-center justify-center gap-10 border-l border-slate-200 dark:border-slate-800 mb-2"
+      >
+        <a href="/index.html" class="nav-link"> Home </a>
+        <a href="/products/product.html" class="nav-link"> Products </a>
+        <!-- <a href="/about/about.html" class="nav-link">
         About me
       </a> -->
-    </nav>
+      </nav>
+    </header>
+    <nav
+      class="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/80 backdrop-blur-lg md:hidden dark:bg-slate-950/80 dark:border-slate-800"
+    >
+      <div class="flex items-center justify-around py-3">
+        <a
+          href="index.html"
+          id="nav-home"
+          class="nav-item flex flex-col w-[55px] items-center gap-1 text-slate-500 dark:text-slate-400"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="currentColor"
+            viewBox="0 0 256 256"
+          >
+            <path
+              d="M240,208H224V136l2.34,2.34A8,8,0,0,0,237.66,127L139.31,28.68a16,16,0,0,0-22.62,0L18.34,127a8,8,0,0,0,11.32,11.31L32,136v72H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16ZM48,120l80-80,80,80v88H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48Zm96,88H112V160h32Z"
+            ></path>
+          </svg>
+          <span class="text-xs font-medium">Home</span>
+        </a>
 
-  </header>
-  <nav
-    class="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/80 backdrop-blur-lg md:hidden dark:bg-slate-950/80 dark:border-slate-800">
-    <div class="flex items-center justify-around py-3">
-      <a href="index.html" id="nav-home"
-        class="nav-item flex flex-col w-[55px] items-center gap-1 text-slate-500 dark:text-slate-400">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
-          <path
-            d="M240,208H224V136l2.34,2.34A8,8,0,0,0,237.66,127L139.31,28.68a16,16,0,0,0-22.62,0L18.34,127a8,8,0,0,0,11.32,11.31L32,136v72H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16ZM48,120l80-80,80,80v88H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48Zm96,88H112V160h32Z">
-          </path>
-        </svg>
-        <span class="text-xs font-medium">Home</span>
-      </a>
+        <a
+          href="/products/product.html"
+          id="nav-product"
+          class="nav-item flex flex-col w-[55px] items-center gap-1 text-slate-500 dark:text-slate-400"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="currentColor"
+            viewBox="0 0 256 256"
+          >
+            <path
+              d="M232,96a7.89,7.89,0,0,0-.3-2.2L217.35,43.6A16.07,16.07,0,0,0,202,32H54A16.07,16.07,0,0,0,38.65,43.6L24.31,93.8A7.89,7.89,0,0,0,24,96h0v16a40,40,0,0,0,16,32v72a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V144a40,40,0,0,0,16-32V96ZM54,48H202l11.42,40H42.61Zm50,56h48v8a24,24,0,0,1-48,0Zm-16,0v8a24,24,0,0,1-35.12,21.26,7.88,7.88,0,0,0-1.82-1.06A24,24,0,0,1,40,112v-8ZM200,208H56V151.2a40.57,40.57,0,0,0,8,.8,40,40,0,0,0,32-16,40,40,0,0,0,64,0,40,40,0,0,0,32,16,40.57,40.57,0,0,0,8-.8Zm4.93-75.8a8.08,8.08,0,0,0-1.8,1.05A24,24,0,0,1,168,112v-8h48v8A24,24,0,0,1,204.93,132.2Z"
+            ></path>
+          </svg>
+          <span class="text-xs font-medium">Product</span>
+        </a>
 
-      <a href="/products/product.html" id="nav-product"
-        class="nav-item flex flex-col w-[55px] items-center gap-1 text-slate-500 dark:text-slate-400">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
-          <path
-            d="M232,96a7.89,7.89,0,0,0-.3-2.2L217.35,43.6A16.07,16.07,0,0,0,202,32H54A16.07,16.07,0,0,0,38.65,43.6L24.31,93.8A7.89,7.89,0,0,0,24,96h0v16a40,40,0,0,0,16,32v72a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V144a40,40,0,0,0,16-32V96ZM54,48H202l11.42,40H42.61Zm50,56h48v8a24,24,0,0,1-48,0Zm-16,0v8a24,24,0,0,1-35.12,21.26,7.88,7.88,0,0,0-1.82-1.06A24,24,0,0,1,40,112v-8ZM200,208H56V151.2a40.57,40.57,0,0,0,8,.8,40,40,0,0,0,32-16,40,40,0,0,0,64,0,40,40,0,0,0,32,16,40.57,40.57,0,0,0,8-.8Zm4.93-75.8a8.08,8.08,0,0,0-1.8,1.05A24,24,0,0,1,168,112v-8h48v8A24,24,0,0,1,204.93,132.2Z">
-          </path>
-        </svg>
-        <span class="text-xs font-medium">Product</span>
-      </a>
-
-      <!-- <a href="/about/about.html" id="nav-receipt"
+        <!-- <a href="/about/about.html" id="nav-receipt"
         class="nav-item flex flex-col w-[55px] items-center gap-1 text-slate-500 dark:text-slate-400">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
           <path
@@ -158,124 +216,191 @@
         </svg>
         <span class="text-xs font-medium">About me</span>
       </a> -->
-    </div>
-  </nav>
-
-
-  <!-- Main -->
-  <main class=" mx-auto max-w-6xl px-4 py-4">
-    <!-- Hero -->
-    <section class="rounded-3xl border bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <div class="max-w-2xl">
-          <p class="text-xs font-medium text-slate-500 dark:text-slate-400">NEW COLLECTION</p>
-          <h2 class="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
-            Find your signature scent.
-          </h2>
-          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            Curated blends with notes of citrus, rose, amber, and oud. Add to cart and checkout in seconds.
-          </p>
-          <div class="mt-4 flex flex-wrap gap-2">
-            <span
-              class="rounded-full border bg-slate-50 px-3 py-1 text-xs text-slate-600 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">Free
-              gift wrap</span>
-            <span
-              class="rounded-full border bg-slate-50 px-3 py-1 text-xs text-slate-600 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">Fast
-              delivery</span>
-            <span
-              class="rounded-full border bg-slate-50 px-3 py-1 text-xs text-slate-600 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300">Secure
-              payment</span>
-          </div>
-        </div>
-
-        <div class="grid w-full max-w-md grid-cols-2 gap-3">
-          <div class="rounded-2xl border bg-slate-50 p-4 dark:bg-slate-950 dark:border-slate-800">
-            <p class="text-xs text-slate-500 dark:text-slate-400">Promo</p>
-            <p class="mt-1 text-sm font-semibold">WELCOME10</p>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Save 10% on checkout</p>
-          </div>
-          <div class="rounded-2xl border bg-slate-50 p-4 dark:bg-slate-950 dark:border-slate-800">
-            <p class="text-xs text-slate-500 dark:text-slate-400">Bestseller</p>
-            <p class="mt-1 text-sm font-semibold">Amber No. 7</p>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Warm & smooth</p>
-          </div>
-          <div class="col-span-2 rounded-2xl bg-slate-900 p-4 text-white dark:bg-white dark:text-slate-900">
-            <p class="text-xs opacity-70">Tip</p>
-            <p class="mt-1 text-sm font-semibold">Try “Sort: Low → High”</p>
-            <p class="mt-1 text-xs opacity-70">And search “rose” or “oud”</p>
-          </div>
-        </div>
       </div>
-    </section>
+    </nav>
 
-    <!-- Products -->
-    <section class="mt-8">
-      <div class="flex items-end justify-between gap-3">
-        <div>
-          <h3 class="text-base font-semibold">Popular Collection</h3>
-          <p id="resultsText" class="text-sm text-slate-500 dark:text-slate-400">Showing 0 items</p>
-        </div>
-
-        <button id="clearFilters" class="rounded-2xl border bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50
-                 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
-          Clear
-        </button>
-      </div>
-
-      <div id="productGrid"
-        class="mt-4 flex gap-4 pb-2 overflow-x-auto sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      </div>
-
-      <div id="detail-modal"
-        class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-[100]">
+    <!-- Main -->
+    <main class="mx-auto max-w-6xl px-4 py-4">
+      <!-- Hero -->
+      <section
+        class="rounded-3xl border bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      >
         <div
-          class="bg-white dark:bg-slate-900 max-w-4xl w-full rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row relative border dark:border-slate-800">
-
-          <button onclick="closeDetail()"
-            class="absolute top-4 right-4 bg-gray-400 hover:bg-gray-500 p-2 rounded-full dark:hover:bg-white z-10">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256">
-              <path
-                d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z">
-              </path>
-            </svg>
-          </button>
-
-          <div class="h-100 w-100 bg-gray-100 dark:bg-slate-800">
-            <img id="detail-img" src="" alt="" class="w-full h-full object-cover aspect-square">
+          class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between"
+        >
+          <div class="max-w-2xl">
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
+              NEW COLLECTION
+            </p>
+            <h2 class="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
+              Find your signature scent.
+            </h2>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+              Curated blends with notes of citrus, rose, amber, and oud. Add to
+              cart and checkout in seconds.
+            </p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span
+                class="rounded-full border bg-slate-50 px-3 py-1 text-xs text-slate-600 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300"
+                >Free gift wrap</span
+              >
+              <span
+                class="rounded-full border bg-slate-50 px-3 py-1 text-xs text-slate-600 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300"
+                >Fast delivery</span
+              >
+              <span
+                class="rounded-full border bg-slate-50 px-3 py-1 text-xs text-slate-600 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300"
+                >Secure payment</span
+              >
+            </div>
           </div>
 
-          <div class="md:w-1/2 p-3 md:p-6 flex flex-col justify-center">
-            <div class="flex items-center justify-between">
-              <h1 id="detail-title" class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white"></h1>
-              <p id="detail-price" class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white"></p>
+          <div class="grid w-full max-w-md grid-cols-2 gap-3">
+            <div
+              class="rounded-2xl border bg-slate-50 p-4 dark:bg-slate-950 dark:border-slate-800"
+            >
+              <p class="text-xs text-slate-500 dark:text-slate-400">Promo</p>
+              <p class="mt-1 text-sm font-semibold">WELCOME10</p>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Save 10% on checkout
+              </p>
             </div>
-
-            <div class="flex items-center justify-between">
-              <p id="detail-brand" class="text-sm font-semibold text-gray-500 dark:text-slate-400 mt-1"></p>
-              <span id="detail-category" class="text-indigo-600 dark:text-indigo-400 text-sm font-semibold"></span>
+            <div
+              class="rounded-2xl border bg-slate-50 p-4 dark:bg-slate-950 dark:border-slate-800"
+            >
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                Bestseller
+              </p>
+              <p class="mt-1 text-sm font-semibold">Amber No. 7</p>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Warm & smooth
+              </p>
             </div>
-
-            <p id="detail-notes" class="mt-2 text-xs md:text-sm flex flex-wrap gap-2"></p>
-            <p class="mt-2 border-t border-gray-200 dark:border-slate-700"></p>
-            <p id="detail-desc" class="text-xs md:text-sm text-gray-600 dark:text-slate-400 mt-2 leading-relaxed"></p>
-
-            <div class="mt-4">
-              <button onclick="closeDetail()"
-                class="w-full text-sm bg-slate-900 dark:bg-white dark:text-slate-900 text-white py-4 rounded-2xl font-bold hover:opacity-90 transition-opacity">
-                Close Preview
-              </button>
+            <div
+              class="col-span-2 rounded-2xl bg-slate-900 p-4 text-white dark:bg-white dark:text-slate-900"
+            >
+              <p class="text-xs opacity-70">Tip</p>
+              <p class="mt-1 text-sm font-semibold">Try “Sort: Low → High”</p>
+              <p class="mt-1 text-xs opacity-70">And search “rose” or “oud”</p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-    </section>
+      <!-- Products -->
+      <section class="mt-8">
+        <div class="flex items-end justify-between gap-3">
+          <div>
+            <h3 class="text-base font-semibold">Popular Collection</h3>
+            <p
+              id="resultsText"
+              class="text-sm text-slate-500 dark:text-slate-400"
+            >
+              Showing 0 items
+            </p>
+          </div>
 
-    <footer class="mt-12 text-center text-xs text-slate-500 dark:text-slate-400">
-      © <span id="year"></span> anajak By Sak — mini app 9Perfume
-    </footer>
+          <button
+            id="clearFilters"
+            class="rounded-2xl border bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800"
+          >
+            Clear
+          </button>
+        </div>
 
-    <!-- <nav
+        <div
+          id="productGrid"
+          class="mt-4 flex gap-4 pb-2 overflow-x-auto sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        ></div>
+
+        <div
+          id="detail-modal"
+          class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-[100]"
+        >
+          <div
+            class="bg-white dark:bg-slate-900 max-w-4xl w-full rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row relative border dark:border-slate-800"
+          >
+            <button
+              onclick="closeDetail()"
+              class="absolute top-4 right-4 bg-gray-400 hover:bg-gray-500 p-2 rounded-full dark:hover:bg-white z-10"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="#000000"
+                viewBox="0 0 256 256"
+              >
+                <path
+                  d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"
+                ></path>
+              </svg>
+            </button>
+
+            <div class="h-100 w-100 bg-gray-100 dark:bg-slate-800">
+              <img
+                id="detail-img"
+                src=""
+                alt=""
+                class="w-full h-full object-cover aspect-square"
+              />
+            </div>
+
+            <div class="md:w-1/2 p-3 md:p-6 flex flex-col justify-center">
+              <div class="flex items-center justify-between">
+                <h1
+                  id="detail-title"
+                  class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white"
+                ></h1>
+                <p
+                  id="detail-price"
+                  class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white"
+                ></p>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <p
+                  id="detail-brand"
+                  class="text-sm font-semibold text-gray-500 dark:text-slate-400 mt-1"
+                ></p>
+                <span
+                  id="detail-category"
+                  class="text-indigo-600 dark:text-indigo-400 text-sm font-semibold"
+                ></span>
+              </div>
+
+              <p
+                id="detail-notes"
+                class="mt-2 text-xs md:text-sm flex flex-wrap gap-2"
+              ></p>
+              <p
+                class="mt-2 border-t border-gray-200 dark:border-slate-700"
+              ></p>
+              <p
+                id="detail-desc"
+                class="text-xs md:text-sm text-gray-600 dark:text-slate-400 mt-2 leading-relaxed"
+              ></p>
+
+              <div class="mt-4">
+                <button
+                  onclick="closeDetail()"
+                  class="w-full text-sm bg-slate-900 dark:bg-white dark:text-slate-900 text-white py-4 rounded-2xl font-bold hover:opacity-90 transition-opacity"
+                >
+                  Close Preview
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer
+        class="mt-12 text-center text-xs text-slate-500 dark:text-slate-400"
+      >
+        © <span id="year"></span> anajak By Sak — mini app 9Perfume
+      </footer>
+
+      <!-- <nav
       class="fixed bottom-0 left-0 right-0 z-1 border-t bg-white/80 backdrop-blur-lg md:hidden dark:bg-slate-950/80 dark:border-slate-800">
       <div class="flex items-center justify-around py-3">
         <a href="/index.html" id="nav-home"
@@ -309,100 +434,159 @@
         </a>
       </div>
     </nav> -->
-  </main>
+    </main>
 
-  <!-- Cart Drawer -->
-  <aside id="cartDrawer" class="fixed inset-0 z-[110] hidden">
-    <div id="cartOverlay" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <!-- Cart Drawer -->
+    <aside id="cartDrawer" class="fixed inset-0 z-[110] hidden">
+      <div
+        id="cartOverlay"
+        class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+      ></div>
 
-    <div class="absolute right-0 top-0 h-[100dvh] w-full max-w-md bg-white shadow-xl dark:bg-slate-950 flex flex-col">
-
-      <div class="flex mt-20 md:mt-5 items-center justify-between border-b px-5 py-4 dark:border-slate-800">
-        <div>
-          <h3 class="text-sm font-semibold">Your cart</h3>
-          <p id="cartSub" class="text-xs text-slate-500 dark:text-slate-400">0 items</p>
-        </div>
-        <button id="closeCartBtn"
-          class="rounded-xl px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-900">✕</button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto px-5 py-4">
-        <div class="rounded-2xl border bg-slate-50 p-3 dark:bg-slate-900 dark:border-slate-800">
-          <p class="text-xs text-slate-500 dark:text-slate-400">Promo code</p>
-          <div class="mt-2 flex gap-2">
-            <input id="promoInput" type="text" placeholder="WELCOME10" class="flex-1 rounded-xl border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
-                   dark:bg-slate-950 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15" />
-            <button id="applyPromo" class="rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800
-                   dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
-              Apply
-            </button>
-          </div>
-          <p id="promoHint" class="mt-2 text-xs text-slate-500 dark:text-slate-400">Try WELCOME10 for 10% off.</p>
-        </div>
-
-        <ul id="cartItems" class="mt-4 space-y-3"></ul>
-
-        <div id="emptyCart"
-          class="mt-6 hidden rounded-2xl border bg-white p-5 text-center dark:bg-slate-900 dark:border-slate-800">
-          <p class="text-sm font-medium">Your cart is empty</p>
-          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Add a perfume to get started.</p>
-        </div>
-      </div>
-
-      <div class="border-t bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-950 pb-safe">
-        <div class="space-y-1 text-sm">
-          <div class="flex justify-between text-slate-600 dark:text-slate-300">
-            <span>Subtotal</span><span id="subtotalText">$0.00</span>
-          </div>
-          <div class="flex justify-between text-slate-600 dark:text-slate-300">
-            <span>Discount</span><span id="discountText">-$0.00</span>
-          </div>
-          <div class="flex justify-between font-semibold">
-            <span>Total</span><span id="totalText">$0.00</span>
-          </div>
-        </div>
-
-        <button id="checkoutBtn" class="mt-4 w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50
-               dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
-          Checkout
-        </button>
-
-        <button id="clearCartBtn" class="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-sm font-medium hover:bg-slate-50
-               dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800">
-          Clear cart
-        </button>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Checkout Modal -->
-  <div id="checkoutBackdrop" class="fixed inset-0 z-[150] hidden items-center justify-center bg-black/40 p-4">
-    <div class="w-full max-w-lg rounded-3xl bg-white shadow-xl dark:bg-slate-950">
-      <div class="flex items-center justify-between border-b px-6 py-4 dark:border-slate-800">
-        <h3 class="text-sm font-semibold">Checkout</h3>
-        <button id="closeCheckout"
-          class="rounded-xl px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-900">✕</button>
-      </div>
-
-      <form id="checkoutForm" class="px-6 py-5 space-y-4">
-        <div class="grid gap-3 sm:grid-cols-2">
+      <div
+        class="absolute right-0 top-0 h-[100dvh] w-full max-w-md bg-white shadow-xl dark:bg-slate-950 flex flex-col"
+      >
+        <div
+          class="flex mt-20 md:mt-5 items-center justify-between border-b px-5 py-4 dark:border-slate-800"
+        >
           <div>
-            <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Phone</label>
-            <input required id="phone"
-              class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
-                     bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
-              placeholder="+855 ..." />
+            <h3 class="text-sm font-semibold">Your cart</h3>
+            <p id="cartSub" class="text-xs text-slate-500 dark:text-slate-400">
+              0 items
+            </p>
           </div>
-          <div>
-            <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Note</label>
-            <input id="note"
-              class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
-                     bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
-              placeholder="Note for delivery" />
+          <button
+            id="closeCartBtn"
+            class="rounded-xl px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-900"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-5 py-4">
+          <div
+            class="rounded-2xl border bg-slate-50 p-3 dark:bg-slate-900 dark:border-slate-800"
+          >
+            <p class="text-xs text-slate-500 dark:text-slate-400">Promo code</p>
+            <div class="mt-2 flex gap-2">
+              <input
+                id="promoInput"
+                type="text"
+                placeholder="WELCOME10"
+                class="flex-1 rounded-xl border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-900/20 dark:bg-slate-950 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+              />
+              <button
+                id="applyPromo"
+                class="rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+              >
+                Apply
+              </button>
+            </div>
+            <p
+              id="promoHint"
+              class="mt-2 text-xs text-slate-500 dark:text-slate-400"
+            >
+              Try WELCOME10 for 10% off.
+            </p>
+          </div>
+
+          <ul id="cartItems" class="mt-4 space-y-3"></ul>
+
+          <div
+            id="emptyCart"
+            class="mt-6 hidden rounded-2xl border bg-white p-5 text-center dark:bg-slate-900 dark:border-slate-800"
+          >
+            <p class="text-sm font-medium">Your cart is empty</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Add a perfume to get started.
+            </p>
           </div>
         </div>
 
-        <!-- <div>
+        <div
+          class="border-t bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-950 pb-safe"
+        >
+          <div class="space-y-1 text-sm">
+            <div
+              class="flex justify-between text-slate-600 dark:text-slate-300"
+            >
+              <span>Subtotal</span><span id="subtotalText">$0.00</span>
+            </div>
+            <div
+              class="flex justify-between text-slate-600 dark:text-slate-300"
+            >
+              <span>Discount</span><span id="discountText">-$0.00</span>
+            </div>
+            <div class="flex justify-between font-semibold">
+              <span>Total</span><span id="totalText">$0.00</span>
+            </div>
+          </div>
+
+          <button
+            id="checkoutBtn"
+            class="mt-4 w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+          >
+            Checkout
+          </button>
+
+          <button
+            id="clearCartBtn"
+            class="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800"
+          >
+            Clear cart
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Checkout Modal -->
+    <div
+      id="checkoutBackdrop"
+      class="fixed inset-0 z-[150] hidden items-center justify-center bg-black/40 p-4"
+    >
+      <div
+        class="w-full max-w-lg rounded-3xl bg-white shadow-xl dark:bg-slate-950"
+      >
+        <div
+          class="flex items-center justify-between border-b px-6 py-4 dark:border-slate-800"
+        >
+          <h3 class="text-sm font-semibold">Checkout</h3>
+          <button
+            id="closeCheckout"
+            class="rounded-xl px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-900"
+          >
+            ✕
+          </button>
+        </div>
+
+        <form id="checkoutForm" class="px-6 py-5 space-y-4">
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label
+                class="text-xs font-medium text-slate-600 dark:text-slate-300"
+                >Phone</label
+              >
+              <input
+                required
+                id="phone"
+                class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20 bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+                placeholder="+855 ..."
+              />
+            </div>
+            <div>
+              <label
+                class="text-xs font-medium text-slate-600 dark:text-slate-300"
+                >Note</label
+              >
+              <input
+                id="note"
+                class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20 bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder:text-slate-400 dark:focus:ring-white/15"
+                placeholder="Note for delivery"
+              />
+            </div>
+          </div>
+
+          <!-- <div>
           <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Delivery address</label>
           <input required id="address"
             class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-900/20
@@ -410,156 +594,221 @@
             placeholder="Street, city, details" />
         </div> -->
 
-        <div>
-          <label class="text-xs font-medium text-slate-600 dark:text-slate-300">Delivery address</label>
-          <div class="flex gap-2">
-            <input required id="address"
-              class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 bg-white dark:bg-slate-900 dark:border-slate-700"
-              placeholder="Street, city, details" />
-            <button type="button" onclick="openMapModal()"
-              class="mt-1 border dark:border-slate-700 bg-white dark:bg-slate-900 p-3 rounded-2xl">
-              <img src="./images/map.png" alt="map">
-            </button>
-          </div>
-
-          <div id="map-container"
-            class="relative w-full hidden mt-2 pl-2 pr-2 pb-2 border rounded-2xl bg-slate-50 dark:bg-slate-900 dark:border-slate-800 overflow-hidden">
-
-            <div id="map" class="z-0" style="height: 250px; width: 100%;"></div>
-
-            <div class="absolute bottom-4 right-4 z-[100]">
-              <button type="button" onclick="getCurrentLocation()"
-                class="flex items-center justify-center bg-white p-2 rounded-full shadow-lg active:bg-slate-100 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256">
-                  <path
-                    d="M232,120h-8.34A96.14,96.14,0,0,0,136,32.34V24a8,8,0,0,0-16,0v8.34A96.14,96.14,0,0,0,32.34,120H24a8,8,0,0,0,0,16h8.34A96.14,96.14,0,0,0,120,223.66V232a8,8,0,0,0,16,0v-8.34A96.14,96.14,0,0,0,223.66,136H232a8,8,0,0,0,0-16Zm-96,87.6V200a8,8,0,0,0-16,0v7.6A80.15,80.15,0,0,1,48.4,136H56a8,8,0,0,0,0-16H48.4A80.15,80.15,0,0,1,120,48.4V56a8,8,0,0,0,16,0V48.4A80.15,80.15,0,0,1,207.6,120H200a8,8,0,0,0,0,16h7.6A80.15,80.15,0,0,1,136,207.6ZM128,88a40,40,0,1,0,40,40A40,40,0,0,0,128,88Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,152Z">
-                  </path>
-                </svg>
+          <div>
+            <label
+              class="text-xs font-medium text-slate-600 dark:text-slate-300"
+              >Delivery address</label
+            >
+            <div class="flex gap-2">
+              <input
+                required
+                id="address"
+                class="mt-1 w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:ring-2 bg-white dark:bg-slate-900 dark:border-slate-700"
+                placeholder="Street, city, details"
+              />
+              <button
+                type="button"
+                onclick="openMapModal()"
+                class="mt-1 border dark:border-slate-700 bg-white dark:bg-slate-900 p-3 rounded-2xl"
+              >
+                <img src="./images/map.png" alt="map" />
               </button>
             </div>
 
-            <div class="absolute bottom-0 flex justify-center items-center w-full z-20">
-              <p
-                class="bg-slate-50 dark:bg-slate-900 text-[10px] px-2 py-0.5 rounded-t-lg text-slate-500 dark:text-slate-300 italic text-center">
-                សូមទាញចំណុចពណ៌ខៀវទៅកាន់ទីតាំងជាក់លាក់របស់អ្នក
-              </p>
+            <div
+              id="map-container"
+              class="relative w-full hidden mt-2 pl-2 pr-2 pb-2 border rounded-2xl bg-slate-50 dark:bg-slate-900 dark:border-slate-800 overflow-hidden"
+            >
+              <div
+                id="map"
+                class="z-0"
+                style="height: 250px; width: 100%"
+              ></div>
+
+              <div class="absolute bottom-4 right-4 z-[100]">
+                <button
+                  type="button"
+                  onclick="getCurrentLocation()"
+                  class="flex items-center justify-center bg-white p-2 rounded-full shadow-lg active:bg-slate-100 transition-colors"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="#000000"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M232,120h-8.34A96.14,96.14,0,0,0,136,32.34V24a8,8,0,0,0-16,0v8.34A96.14,96.14,0,0,0,32.34,120H24a8,8,0,0,0,0,16h8.34A96.14,96.14,0,0,0,120,223.66V232a8,8,0,0,0,16,0v-8.34A96.14,96.14,0,0,0,223.66,136H232a8,8,0,0,0,0-16Zm-96,87.6V200a8,8,0,0,0-16,0v7.6A80.15,80.15,0,0,1,48.4,136H56a8,8,0,0,0,0-16H48.4A80.15,80.15,0,0,1,120,48.4V56a8,8,0,0,0,16,0V48.4A80.15,80.15,0,0,1,207.6,120H200a8,8,0,0,0,0,16h7.6A80.15,80.15,0,0,1,136,207.6ZM128,88a40,40,0,1,0,40,40A40,40,0,0,0,128,88Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,152Z"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+
+              <div
+                class="absolute bottom-0 flex justify-center items-center w-full z-20"
+              >
+                <p
+                  class="bg-slate-50 dark:bg-slate-900 text-[10px] px-2 py-0.5 rounded-t-lg text-slate-500 dark:text-slate-300 italic text-center"
+                >
+                  សូមទាញចំណុចពណ៌ខៀវទៅកាន់ទីតាំងជាក់លាក់របស់អ្នក
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="rounded-2xl border bg-slate-50 p-4 text-sm dark:bg-slate-900 dark:border-slate-800">
-          <div class="flex justify-between text-slate-600 dark:text-slate-300">
-            <span>Order total</span><span id="checkoutTotal">$0.00</span>
+          <div
+            class="rounded-2xl border bg-slate-50 p-4 text-sm dark:bg-slate-900 dark:border-slate-800"
+          >
+            <div
+              class="flex justify-between text-slate-600 dark:text-slate-300"
+            >
+              <span>Order total</span><span id="checkoutTotal">$0.00</span>
+            </div>
+            <div class="flex justify-between items-center gap-2">
+              <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                We Accept :
+              </p>
+              <img src="./images/khqr.png" alt="khqr" class="h-4 mt-1" />
+            </div>
           </div>
-          <div class="flex justify-between items-center gap-2">
-            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              We Accept :
-            </p>
-            <img src="./images/khqr.png" alt="khqr" class="h-4 mt-1">
-          </div>
-        </div>
 
-        <!-- <button id="payBtn" type="submit" class="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800
+          <!-- <button id="payBtn" type="submit" class="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800
                        dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
           Pay
         </button> -->
 
-        <button id="payBtn" type="submit"
-          class="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
-          Pay
-        </button>
-      </form>
-
+          <button
+            id="payBtn"
+            type="submit"
+            class="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+          >
+            Pay
+          </button>
+        </form>
+      </div>
     </div>
-  </div>
 
-  <!-- payment -->
-  <div id="paymentModal"
-    class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <!-- payment -->
     <div
-      class="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-slate-900 border dark:border-slate-700">
-      <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Scan to Pay</h3>
-      <p class="text-sm text-slate-500 mb-4">Total: <span id="paymentTotal" class="font-bold text-red-600">$0.00</span>
-      </p>
+      id="paymentModal"
+      class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+    >
+      <div
+        class="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-slate-900 border dark:border-slate-700"
+      >
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">
+          Scan to Pay
+        </h3>
+        <p class="text-sm text-slate-500 mb-4">
+          Total:
+          <span id="paymentTotal" class="font-bold text-red-600">$0.00</span>
+        </p>
 
-      <div class="flex justify-center items-center bg-white p-2 rounded-xl border-2 border-slate-100 mb-4">
-        <canvas id="qrCanvas"></canvas>
+        <div
+          class="flex justify-center items-center bg-white p-2 rounded-xl border-2 border-slate-100 mb-4"
+        >
+          <canvas id="qrCanvas"></canvas>
+        </div>
+
+        <p class="text-xs text-slate-400 animate-pulse mb-4">
+          កំពុងរង់ចាំការបង់ប្រាក់... (Checking Payment)
+        </p>
+
+        <div class="flex justify-center items-center gap-2">
+          <button
+            id="saveQRBtn"
+            class="rounded-xl bg-blue-600 py-3 px-3 text-sm font-semibold text-white hover:bg-blue-700 flex items-center justify-center gap-2"
+          >
+            <svg
+              class="brightness-0 invert dark:invert-0"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="#000000"
+              viewBox="0 0 256 256"
+            >
+              <path
+                d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"
+              ></path>
+            </svg>
+          </button>
+
+          <button
+            id="closePaymentBtn"
+            class="w-full rounded-xl bg-slate-200 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-300"
+          >
+            Close
+          </button>
+        </div>
       </div>
-
-      <p class="text-xs text-slate-400 animate-pulse mb-4">កំពុងរង់ចាំការបង់ប្រាក់... (Checking Payment)</p>
-
-      <div class="flex justify-center items-center gap-2">
-        <button id="saveQRBtn"
-          class="rounded-xl bg-blue-600 py-3 px-3 text-sm font-semibold text-white hover:bg-blue-700 flex items-center justify-center gap-2">
-          <svg class="brightness-0 invert dark:invert-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256">
-            <path
-              d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z">
-            </path>
-          </svg>
-        </button>
-
-        <button id="closePaymentBtn"
-          class="w-full rounded-xl bg-slate-200 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-300">
-          Close
-        </button>
-      </div>
-
     </div>
-  </div>
 
-    <div id="paymentModal"
-    class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div
-      class="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-slate-900 border dark:border-slate-700">
-      <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Scan to Pay</h3>
-      <p class="text-sm text-slate-500 mb-4">Total: <span id="paymentTotal" class="font-bold text-red-600">$0.00</span>
-      </p>
-
-      <div class="flex justify-center items-center bg-white p-2 rounded-xl border-2 border-slate-100 mb-4">
-        <canvas id="qrCanvas"></canvas>
-      </div>
-
-      <p class="text-xs text-slate-400 animate-pulse mb-4">កំពុងរង់ចាំការបង់ប្រាក់... (Checking Payment)</p>
-
-      <div class="flex justify-center items-center gap-2">
-        <button id="saveQRBtn"
-          class="rounded-xl bg-blue-600 py-3 px-3 text-sm font-semibold text-white hover:bg-blue-700 flex items-center justify-center gap-2">
-          <svg class="brightness-0 invert dark:invert-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256">
+      id="successModal"
+      class="fixed inset-0 z-[300] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+    >
+      <div
+        class="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-slate-900 border dark:border-slate-700"
+      >
+        <div
+          class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
+        >
+          <svg
+            class="h-10 w-10 text-green-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
-              d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z">
-            </path>
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            ></path>
           </svg>
-        </button>
+        </div>
 
-        <button id="closePaymentBtn"
-          class="w-full rounded-xl bg-slate-200 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-300">
-          Close
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">
+          បង់ប្រាក់ជោគជ័យ! ✅
+        </h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          ការទូទាត់របស់អ្នកទទួលបានជោគជ័យ។ សូមពិនិត្យមើលវិក្កយបត្រ (Receipt)
+          នៅក្នុង Bot របស់អ្នក។
+        </p>
+
+        <button
+          id="closeAppBtn"
+          onclick="closeAppAndModal()"
+          class="w-full rounded-xl bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
+        >
+          ត្រឡប់ទៅកាន់ Bot វិញ
         </button>
       </div>
-
     </div>
-  </div>
 
-  <!-- Toast -->
-  <div id="toast" class="pointer-events-none fixed bottom-4 right-4 z-[60] hidden max-w-sm rounded-2xl border bg-white px-4 py-3 shadow-lg
-           dark:bg-slate-900 dark:border-slate-800">
-    <p id="toastText" class="text-sm text-slate-800 dark:text-slate-100"></p>
-  </div>
-  <!-- <script src="../products/product.js"></script> -->
-  <script src="script.js"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready(); // Tell Telegram the app is ready
-    tg.expand();
+    <!-- Toast -->
+    <div
+      id="toast"
+      class="pointer-events-none fixed bottom-4 right-4 z-[60] hidden max-w-sm rounded-2xl border bg-white px-4 py-3 shadow-lg dark:bg-slate-900 dark:border-slate-800"
+    >
+      <p id="toastText" class="text-sm text-slate-800 dark:text-slate-100"></p>
+    </div>
+    <!-- <script src="../products/product.js"></script> -->
+    <script src="script.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      const tg = window.Telegram.WebApp;
+      tg.ready(); // Tell Telegram the app is ready
+      tg.expand();
 
-    // Safely request fullscreen only if supported (requires v8.0+)
-    if (tg.isVersionAtLeast('8.0')) {
-      tg.requestFullscreen();
-    } else {
-      console.log("Fullscreen not supported on this Telegram version.");
-    }
-  </script>
-</body>
-
+      // Safely request fullscreen only if supported (requires v8.0+)
+      if (tg.isVersionAtLeast("8.0")) {
+        tg.requestFullscreen();
+      } else {
+        console.log("Fullscreen not supported on this Telegram version.");
+      }
+    </script>
+  </body>
 </html>
