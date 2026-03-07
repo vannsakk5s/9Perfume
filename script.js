@@ -830,7 +830,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // ... (កូដផ្សេងៗនៅដដែល) ...
 
 // URL របស់ Server (ត្រូវប្រាកដថាត្រឹមត្រូវ)
-const API_BASE_URL = "https://brooklyn-over-evanescence-looks.trycloudflare.com";
+const API_BASE_URL = "https://allowance-pose-sox-shareholders.trycloudflare.com";
 let checkPaymentInterval = null;
 
 // ==========================================
@@ -969,11 +969,17 @@ function startCheckingPayment(md5, orderId) {
         renderCartBadge();
         renderCart();
 
-        showToast("បង់ប្រាក់ជោគជ័យ! (Payment Successful) ✅");
+        // ១. ប្តូរសារ (Toast Message) តាមការចង់បាន
+        showToast("ការបង់ប្រាក់ជោគជ័យ! សូមពិនិត្យមើលវិក្កយបត្រក្នុង Bot របស់អ្នក ✅");
+        
         document.getElementById("checkoutForm").reset();
 
-        // ជម្រើសបន្ថែម៖ បញ្ជូនទៅកាន់ទំព័រផ្សេងក្រោយជោគជ័យ
-        // setTimeout(() => window.location.href = "/success.html", 1500);
+        // ២. បិទ Telegram Mini App ដោយស្វ័យប្រវត្តិ បន្ទាប់ពី ២.៥ វិនាទី
+        setTimeout(() => {
+          if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.close();
+          }
+        }, 2500); 
       }
     } catch (err) {
       // កុំដាក់ showToast ក្នុង catch នេះ ព្រោះវាលោតរំខានរាល់ ៣ វិនាទីពេល Internet ដាច់
