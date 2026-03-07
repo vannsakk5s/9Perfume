@@ -844,7 +844,7 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
   const phone = $("#phone").value.trim();
   const address = $("#address").value.trim();
   if (!phone || !address) {
-    showToast("Please fill in your phone number and address! ⚠️");
+    showToast("សូមបំពេញលេខទូរស័ព្ទ និងអាសយដ្ឋាន! ⚠️");
     return;
   }
 
@@ -884,7 +884,7 @@ $("#checkoutForm").addEventListener("submit", async (e) => {
       // ហៅមុខងារបង្ហាញ QR និងចាប់ផ្តើមឆែកការបង់ប្រាក់
       showPaymentModal(data.payment.qrString, data.payment.md5, data.orderId, data.payment.amount);
     } else {
-      showToast("Failed to create order ❌");
+      showToast("បរាជ័យក្នុងការបង្កើតការកុម្ម៉ង់ ❌");
     }
 
   } catch (err) {
@@ -944,7 +944,7 @@ function startCheckingPayment(md5, orderId) {
 
     if (attempts > 30) { // ៣០ ដង x ៣ វិនាទី = ១ នាទី ៣០ វិនាទី
       clearInterval(checkPaymentInterval);
-      showToast("Timeout ⚠️");
+      showToast("ការបង់ប្រាក់អស់ពេលកំណត់ (Timeout) ⚠️");
       return;
     }
 
@@ -1085,7 +1085,7 @@ async function searchLocation() {
       currentCoords = { lat: parseFloat(lat), lng: parseFloat(lon) };
       document.getElementById('address').value = display_name;
     } else {
-      alert("cannot find this location!");
+      alert("រកមិនឃើញទីតាំងនេះទេ!");
     }
   } catch (error) {
     console.error("Search error:", error);
@@ -1094,7 +1094,7 @@ async function searchLocation() {
 
 // មុខងារចាប់យកទីតាំងបច្ចុប្បន្ន (Current Location)
 function getCurrentLocation() {
-  if (!navigator.geolocation) return alert("Browser does not support geolocation!");
+  if (!navigator.geolocation) return alert("Browser របស់អ្នកមិនគាំទ្រការចាប់ទីតាំងទេ");
 
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const { latitude, longitude } = pos.coords;
@@ -1105,7 +1105,7 @@ function getCurrentLocation() {
     currentCoords = { lat: latitude, lng: longitude };
     await updateAddressFromCoords(latitude, longitude);
   }, (err) => {
-    alert("Cannot get location: " + err.message);
+    alert("មិនអាចចាប់យកទីតាំងបានទេ៖ " + err.message);
   });
 }
 
@@ -1118,7 +1118,7 @@ async function updateAddressFromCoords(lat, lng) {
       currentCoords = { lat, lng };
     }
   } catch (error) {
-    console.log("cannot find address:", error);
+    console.log("រកមិនឃើញអាសយដ្ឋាន:", error);
   }
 }
 
