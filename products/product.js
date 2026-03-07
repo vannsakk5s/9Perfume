@@ -676,7 +676,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // });
 
 // URL របស់ Server (ត្រូវប្រាកដថាត្រឹមត្រូវ)
-const API_BASE_URL = "https://fee-reducing-apparently-technician.trycloudflare.com";
+const API_BASE_URL = "https://brooklyn-over-evanescence-looks.trycloudflare.com";
 let checkPaymentInterval = null;
 
 // ==========================================
