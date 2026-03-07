@@ -415,6 +415,50 @@
         </div>
     </div>
 
+    <div
+      id="successModal"
+      class="fixed inset-0 z-[300] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+    >
+      <div
+        class="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-slate-900 border dark:border-slate-700"
+      >
+        <div
+          class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
+        >
+          <svg
+            class="h-10 w-10 text-green-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            ></path>
+          </svg>
+        </div>
+
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">
+          បង់ប្រាក់ជោគជ័យ! ✅
+        </h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          ការទូទាត់របស់អ្នកទទួលបានជោគជ័យ។ សូមពិនិត្យមើលវិក្កយបត្រ (Receipt)
+          នៅក្នុង Bot របស់អ្នក។
+        </p>
+
+        <button
+          id="closeAppBtn"
+          onclick="closeAppAndModal()"
+          class="w-full rounded-xl bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
+        >
+          ត្រឡប់ទៅកាន់ Bot វិញ
+        </button>
+      </div>
+    </div>
+
     <!-- Toast -->
     <div id="toast" class="pointer-events-none fixed bottom-4 right-4 z-[60] hidden max-w-sm rounded-2xl border bg-white px-4 py-3 shadow-lg
            dark:bg-slate-900 dark:border-slate-800">

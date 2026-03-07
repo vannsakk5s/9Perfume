@@ -808,24 +808,36 @@ function startCheckingPayment(md5, orderId) {
 
       if (result.success) {
         clearInterval(checkPaymentInterval);
-        closePaymentModal();
+        closePaymentModal(); // បិទផ្ទាំង QR Code
 
+        // សម្អាតទិន្នន័យក្នុងកន្ត្រក
         cart = {};
         saveCart();
         renderCartBadge();
         renderCart();
-
-        showToast("បង់ប្រាក់ជោគជ័យ! (Payment Successful) ✅");
         document.getElementById("checkoutForm").reset();
 
-        // ជម្រើសបន្ថែម៖ បញ្ជូនទៅកាន់ទំព័រផ្សេងក្រោយជោគជ័យ
-        // setTimeout(() => window.location.href = "/success.html", 1500);
+        // បង្ហាញផ្ទាំង Success Popup ជំនួសឱ្យ Toast
+        const successModal = document.getElementById('successModal');
+        successModal.classList.remove('hidden');
+        successModal.classList.add('flex');
       }
     } catch (err) {
       // កុំដាក់ showToast ក្នុង catch នេះ ព្រោះវាលោតរំខានរាល់ ៣ វិនាទីពេល Internet ដាច់
       console.log("Polling payment status...");
     }
   }, 3000);
+}
+
+function closeAppAndModal() {
+  const successModal = document.getElementById('successModal');
+  successModal.classList.add('hidden');
+  successModal.classList.remove('flex');
+  
+  // បិទ Telegram App ដោយស្វ័យប្រវត្តិដើម្បីទៅមើល Chat
+  if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.close();
+  }
 }
 
 // មុខងារបិទ Modal
