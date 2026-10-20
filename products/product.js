@@ -675,8 +675,10 @@ document.addEventListener("DOMContentLoaded", () => {
 //   }
 // });
 
-// URL របស់ Server (ត្រូវប្រាកដថាត្រឹមត្រូវ)
-const API_BASE_URL = "https://wrapped-rochester-starts-projector.trycloudflare.com";
+// URL របស់ Server (ទាញយកពី config.js តែម្តងគត់)
+const API_BASE_URL = typeof window.getApiBaseUrl === "function" 
+  ? window.getApiBaseUrl() 
+  : (window.APP_CONFIG?.API_BASE_URL || "https://allowance-pose-sox-shareholders.trycloudflare.com");
 let checkPaymentInterval = null;
 
 // ==========================================
