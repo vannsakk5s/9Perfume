@@ -15,7 +15,7 @@
 
 window.APP_CONFIG = {
   // PASTE YOUR SERVER API URL HERE:
-  API_BASE_URL: "https://allowance-pose-sox-shareholders.trycloudflare.com",
+  API_BASE_URL: "https://fresh-extending-advocacy-tune.trycloudflare.com",
 };
 
 /**
